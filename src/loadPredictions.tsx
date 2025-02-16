@@ -30,6 +30,7 @@ export const loadPredictions = async () => {
   // console.log("noteListRes", noteListRes.data.notifications);
   return noteListRes.data.notifications
     .filter((notif) => notif.reason === "mention")
+    .filter((notif)=>(notif.record as Prediction['record']).text.toLowerCase().includes('i predict'))
     .map<Prediction>((notif) => ({
       author: notif.author,
       record: notif.record as Prediction["record"],
