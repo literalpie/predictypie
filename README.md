@@ -12,6 +12,8 @@ Currently, this app only lists predictions that people make with the above patte
 
 ## Development
 
+See [./plans](./plans.md) for the informal roadmap.
+
 - [Solid](https://docs.solidjs.com) is used for UI
 - pnpm is the package manager
 - Netlify is used to publish the app on every push to the main branch
