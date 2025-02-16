@@ -1,28 +1,24 @@
-import { Suspense } from "solid-js";
-import { createAsync } from "@solidjs/router";
+import { ErrorBoundary, Suspense } from "solid-js";
+import { Router } from "@solidjs/router";
+import { FileRoutes } from "@solidjs/start/router";
 import "./app.css";
-import { loadPredictions } from "./loadPredictions";
 
 export default function App() {
-  const predictions = createAsync(loadPredictions);
   return (
     <main>
-      <Suspense fallback="loading something...">
-        {predictions()?.map((pred) => (
-          <>
-            <div>
-              {pred.record.text}{" "}
-              <a
-                href={`https://bsky.app/profile/${
-                  pred.author.handle
-                }/post/${pred.uri.split("/").at(-1)}`}
-              >
-                post
-              </a>
-            </div>
-          </>
-        ))}
-      </Suspense>
+      <header>
+        <h1>PredictyPie</h1>
+      </header>
+      <ErrorBoundary fallback="An error occurred">
+        <Router
+          root={(props) => (
+            <Suspense fallback="Loading Route">{props.children}</Suspense>
+          )}
+        >
+          <FileRoutes />
+        </Router>
+
+      </ErrorBoundary>
     </main>
   );
 }
