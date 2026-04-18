@@ -1,26 +1,43 @@
-# Predicty-pie
+# PredictyPie
 
-## Usage
+An AT Protocol app for making and browsing predictions. Users store predictions in their own PDS (not a custom PDS), and they're mirrored to Convex via Tap webhook.
 
-See the live app at https://predictypie.netlify.app/
+## Quick Start
 
-This is an app that keeps track of predictions that people make.
+```bash
+# Install dependencies
+pnpm install
 
-To use it, make a bluesky post with "@predictypie.bsky.social I predict " followed by your prediction.
+# Start Convex + dev server
+pnpm convex dev --start 'vite dev --port 3000'
+```
 
-Currently, this app only lists predictions that people make with the above pattern.
+Visit http://127.0.0.1:3000 and log in with your AT Protocol account.
 
-## Development
+## Tap (Webhook for Mirroring)
 
-See [./plans](./plans.md) for the informal roadmap.
+Tap mirrors predictions from users' PDSes to Convex.
 
-- [Solid](https://docs.solidjs.com) is used for UI
-- pnpm is the package manager
-- Netlify is used to publish the app on every push to the main branch
+### Run Tap
 
-To test locally, run `pnpm dev`. Things won't work unless you have a `.env` file with contents like the following:
+```bash
+$(go env GOPATH)/bin/tap run --webhook-url=http://localhost:3000/webhook --collection-filters=app.predictypie.prediction --admin-password=admin
+```
+
+The webhook endpoint is at `/webhook`.
+
+## Environment Variables
+
+Create `.env.local` with:
 
 ```
-BSKY_IDENTIFIER="predictypie.bsky.social"
-BSKY_PASSWORD="REDACTED"
+CONVEX_DEPLOYMENT=<your-convex-deployment>
+TAP_ADMIN_PASSWORD=admin
 ```
+
+## Tech Stack
+
+- Solid + Vite
+- Convex (database)
+- AT Protocol OAuth (PDS-hosted data)
+- Tap (repo synchronization)
