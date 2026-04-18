@@ -1,5 +1,7 @@
+This is a package.json from my other at proto app. Use this to set the dependencies
+```
 {
-  "name": "predictypie",
+  "name": "example-bare",
   "type": "module",
   "scripts": {
     "dev": "vite dev --host 127.0.0.1",
@@ -29,10 +31,11 @@
     "oxlint": "^1.60.0",
     "solid-js": "^1.9.12",
     "tailwindcss": "^4.2.2",
-    "vite": "^8.0.8",
-    "vite-plugin-solid": "^2.11.0"
+    "vite": "^8.0.8"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   }
 }
+
+```

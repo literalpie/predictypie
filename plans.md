@@ -1,25 +1,92 @@
+# PredictyPie v2.0 Plan
 
-# Plans
+Stack: Solid + Convex + AT Proto (no custom PDS)
 
-I'm not making issues in Github for these things because the app/project isn't formal enough to warrent that. Contributions are welcome though! If you are interested in doing any of this, feel free to open an issue to ask questions of discuss plans.
+## Status
 
-## Stuff I definitely want to do
-* Make it not-ugly
-* More metadata about predictions (probably use TanStack table) starting with author and date prediction was made
-* Show "upvotes"/"downvotes" (based on people who respond with "I predict this is right/wrong")
+- Phase 1: ✅ Complete
+- Phase 2: ✅ Lexicon defined (src/lexicons/app.predictypie/prediction.ts)
+- Phase 3: ✅ Convex schema deployed (convex/schema.ts)
+- Phase 4: ✅ OAuth client + routes created
+- Phase 5: ⚠️ SSR works, client-side fetch in progress
+- Phase 6: ⏳ Not started
 
-## Stuff I probably want to do
+## To Run
 
-* Keep predictions in a db (supabase or similar) and do scraping periodically instead of on every page load
-* Show "related predictions" based on responses to the original prediction post that have their own predictions
-* Allow predictions to have a "deadline" by which the author thinks they will be proven right
+```bash
+pnpm convex dev --start 'vite dev --port 3001'
+```
 
-## Scratchpad of thoughts
+## Phase 1: Hello World ✅
 
-Should it be possible to upvote/downvote preditions through the app, so you don't have to clutter your feed? I think no at first for simplicity, since this is supposed to be a social app. I also don't want to deal with signing in to the app.
+- Delete: `src/routes/(home).tsx`, `src/routes/prediction/`, `src/loadPredictions.tsx`, `src/mocks.ts`, `supabase/functions/`
+- Update dependencies (use `reference-package-json.md`)
+- Add Convex + Tailwind config
+- Minimal hello world route
 
-Should this app have its own db to persist, instead of using REST to get all notifications every time the page loads? Yes, definitely if we get to any reasonable scale. I don't think there's a way to only get notifications that happened since a specific time, so maybe the data scraping should only happen on a certain interval, or with a manual refresh by admins (me). 
-Even if we did get new notifications, I would still want to re-scan the replies to old notifications (unless even replies need to have the "@")
+## Phase 2: Custom Lexicon ✅
 
-Is there a way to attribute a prediction to someone? For example, a podcaster or CEO (*caugh* Elon) who makes a public promise about someone?
-I would want this to require a clear attribution of the original prediction, and don't want to be responsible for fact-checking and stuff
+```json
+{
+  "lexicon": 1,
+  "id": "app.predictypie.prediction",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "text": { "type": "string", "maxGraphemes": 500 },
+        "deadline": { "type": "datetime", "nullable": true }
+      }
+    }
+  }
+}
+```
+
+## Phase 3: Convex Schema + Mirror ✅
+
+- **users**: `did` (key), `handle`
+- **predictions**: `rkey` (key), `atUri`, `authorDid`, `text`, `deadline`, `createdAt`, `resolvedAs`
+- **authStates**, **sessions**: for OAuth
+- Firehose consumer → NOT YET (need webhook or firehose setup)
+
+## Phase 4: OAuth + Create ✅
+
+- AT Proto OAuth client (src/auth/client.ts)
+- Create form: text + optional deadline
+- Submit → `com.atproto.repo.createRecord` on user's PDS
+
+## Phase 5: Browse UI ⚠️
+
+- List predictions from Convex
+- Show: text, author (via users table), deadline, resolution status
+- Issue: SSR query fails (needs fix), client-side works
+
+## Phase 6: Resolve ⏳
+
+- Author-only: update `resolvedAs` to `correct`/`incorrect`
+- Calls `com.atproto.repo.updateRecord` on their PDS
+
+## File Structure
+
+```
+src/
+├── auth/client.ts           # OAuth client
+├── components/LoginForm.tsx
+├── lib/
+│   ├── convex.tsx        # Convex queries
+│   └── contextHttpClient.ts
+├── routes/
+│   ├── index.tsx        # Home
+│   ├── new.tsx          # Create form
+│   ├── api/new.ts       # Create API
+│   ├── session.ts
+│   └── oauth/
+│       ├── login.ts
+│       └── callback.ts
+├── lexicons/app.predictypie/prediction.ts
+convex/
+├── schema.ts
+├── predictions.ts
+└── auth.ts
+```
