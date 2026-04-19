@@ -60,7 +60,7 @@ export const createPrediction = mutation({
       .withIndex("by_rkey", (q) => q.eq("rkey", args.rkey))
       .unique();
 
-if (existing) {
+    if (existing) {
       await ctx.db.patch(existing._id, args);
     } else {
       await ctx.db.insert("predictions", { ...args, resolvedAs: undefined });

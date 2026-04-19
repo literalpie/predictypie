@@ -1,4 +1,5 @@
 This is a package.json from my other at proto app. Use this to set the dependencies
+
 ```
 {
   "name": "example-bare",

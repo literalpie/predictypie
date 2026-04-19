@@ -13,7 +13,8 @@ export async function POST({ request, nativeEvent }: APIEvent) {
 
     // Get the base URL from the request
     const protocol = nativeEvent?.socket?.encrypted ? "https" : "http";
-    const host = request.headers.get("x-forwarded-host") || request.headers.get("host") || "127.0.0.1:3001";
+    const host =
+      request.headers.get("x-forwarded-host") || request.headers.get("host") || "127.0.0.1:3001";
     const baseUrl = `${protocol}://${host}`;
 
     const client = await getOAuthClient(baseUrl);

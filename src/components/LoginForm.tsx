@@ -32,9 +32,7 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} class="space-y-4">
       <div>
-        <label class="block text-sm font-medium text-zinc-700 mb-1">
-          Handle
-        </label>
+        <label class="block text-sm font-medium text-zinc-700 mb-1">Handle</label>
         <input
           type="text"
           value={handle()}

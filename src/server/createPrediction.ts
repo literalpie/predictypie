@@ -56,6 +56,6 @@ export const resolvePrediction = async (
       createdAt: existing.value.createdAt,
       resolvedAs,
     },
-    { rkey }
+    { rkey },
   );
 };

@@ -32,5 +32,6 @@ export function createMutation<M extends MutationFn>(mutation: M) {
   const convex = useContext(ConvexContext);
   if (!convex) throw "No convex context";
 
-  return (args?: FunctionArgs<M>) => convex.mutation(mutation, (args ?? {}) as Record<string, unknown>);
+  return (args?: FunctionArgs<M>) =>
+    convex.mutation(mutation, (args ?? {}) as Record<string, unknown>);
 }

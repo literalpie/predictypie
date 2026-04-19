@@ -40,7 +40,7 @@ export async function POST({ request }: { request: Request }) {
 
     if (evt.action === "create" || evt.action === "update") {
       const handle = await resolveHandle(evt.did);
-await convexHttpClient.mutation(api.predictions.createPrediction, {
+      await convexHttpClient.mutation(api.predictions.createPrediction, {
         rkey: evt.rkey,
         atUri: uri.toString(),
         authorDid: evt.did,
