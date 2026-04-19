@@ -36,3 +36,31 @@ export const createPrediction = async (did: string, text: string, deadline?: str
 
   return result.uri;
 };
+
+export const resolvePrediction = async (
+  did: string,
+  atUri: string,
+  resolvedAs: "correct" | "incorrect",
+) => {
+  const parts = atUri.replace("at://", "").split("/");
+  const rkey = parts[2];
+
+  const client = await getOAuthClient();
+  const oauthSession = await client.restore(did);
+  const lexClient = new Client(oauthSession);
+
+  const existing = await lexClient.get(predictionMain, { rkey });
+
+  await lexClient.put(
+    predictionMain,
+    {
+      text: existing.value.text,
+      deadline: existing.value.deadline,
+      createdAt: existing.value.createdAt,
+      resolvedAs,
+    },
+    { rkey }
+  );
+
+  console.log("PDS update succeeded:", atUri);
+};

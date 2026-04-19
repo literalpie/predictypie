@@ -13,6 +13,7 @@ type Main = {
   text: string
   createdAt: l.DatetimeString
   deadline: l.DatetimeString
+  resolvedAs?: 'correct' | 'incorrect'
 }
 
 export type { Main }
@@ -24,6 +25,7 @@ const main = l.record<'tid', Main>(
     text: l.string({ maxGraphemes: 500 }),
     createdAt: l.string({ format: 'datetime' }),
     deadline: l.string({ format: 'datetime' }),
+    resolvedAs: l.optional(l.enum(['correct', 'incorrect'])),
   }),
 )
 

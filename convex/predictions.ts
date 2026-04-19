@@ -52,6 +52,7 @@ export const createPrediction = mutation({
     text: v.string(),
     deadline: v.optional(v.string()),
     createdAt: v.string(),
+    resolvedAs: v.optional(v.union(v.literal("correct"), v.literal("incorrect"))),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -59,13 +60,27 @@ export const createPrediction = mutation({
       .withIndex("by_rkey", (q) => q.eq("rkey", args.rkey))
       .unique();
 
-    if (existing) {
+if (existing) {
       await ctx.db.patch(existing._id, args);
     } else {
       await ctx.db.insert("predictions", { ...args, resolvedAs: undefined });
     }
+  },
+});
 
-    await upsertUser(ctx, args.authorDid);
+export const upsertUser = mutation({
+  args: { did: v.string(), handle: v.optional(v.string()) },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_did", (q) => q.eq("did", args.did))
+      .unique();
+
+    if (!existing) {
+      await ctx.db.insert("users", { did: args.did, handle: args.handle || args.did });
+    } else if (args.handle && existing.handle !== args.handle) {
+      await ctx.db.patch(existing._id, { handle: args.handle });
+    }
   },
 });
 
@@ -85,15 +100,3 @@ export const resolvePrediction = mutation({
     }
   },
 });
-
-async function upsertUser(ctx: any, did: string) {
-  const existing = await ctx.db
-    .query("users")
-    .withIndex("by_did", (q) => q.eq("did", did))
-    .unique();
-
-  // TODO: resolve handle from DID - for now skip
-  if (!existing) {
-    await ctx.db.insert("users", { did, handle: did });
-  }
-}

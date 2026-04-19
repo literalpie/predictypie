@@ -19,6 +19,10 @@
           "deadline": {
             "type": "string",
             "format": "datetime"
+          },
+          "resolvedAs": {
+            "type": "string",
+            "enum": ["correct", "incorrect"]
           }
         }
       }

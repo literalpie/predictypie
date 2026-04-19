@@ -1,11 +1,34 @@
 import { createSignal } from "solid-js";
+import { action, redirect, useAction } from "@solidjs/router";
+import { getCookie } from "@solidjs/start/http";
+import { createPrediction as createPredictionToPds } from "~/server/createPrediction";
+
+const createPredictionAction = action(async (formData: FormData) => {
+  "use server";
+
+  const did = getCookie("did");
+  if (!did) {
+    throw new Error("Not logged in");
+  }
+
+  const text = formData.get("text") as string;
+  const deadline = formData.get("deadline") as string | null;
+
+  if (!text || text.length > 500) {
+    throw new Error("Prediction text is required (max 500 chars)");
+  }
+
+  await createPredictionToPds(did, text, deadline || undefined);
+
+  throw redirect("/");
+}, "createPrediction");
 
 export default function NewPrediction() {
+  const createPrediction = useAction(createPredictionAction);
   const [text, setText] = createSignal("");
   const [deadline, setDeadline] = createSignal("");
   const [loading, setLoading] = createSignal(false);
   const [error, setError] = createSignal<string | null>(null);
-  const [loggedIn, setLoggedIn] = createSignal(true);
 
   async function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
@@ -13,23 +36,12 @@ export default function NewPrediction() {
     setError(null);
 
     try {
-      const res = await fetch("/api/new", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: text(),
-          deadline: deadline() || undefined,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        if (data.error?.includes("logged in")) {
-          setLoggedIn(false);
-        }
-        throw new Error(data.error || "Failed to create prediction");
+      const formData = new FormData();
+      formData.set("text", text());
+      if (deadline()) {
+        formData.set("deadline", deadline());
       }
-      window.location.href = "/";
+      await createPrediction(formData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create prediction");
       setLoading(false);
@@ -39,13 +51,6 @@ export default function NewPrediction() {
   return (
     <main class="max-w-2xl mx-auto p-4">
       <h1 class="text-2xl font-bold mb-4">New Prediction</h1>
-
-      {!loggedIn() && (
-        <div class="bg-yellow-50 border border-yellow-200 rounded p-4 mb-4">
-          <p class="text-yellow-800 mb-2">You must be logged in to create a prediction.</p>
-          <a href="/oauth/login" class="text-blue-600 hover:underline">Sign in first</a>
-        </div>
-      )}
 
       <form onSubmit={handleSubmit} class="space-y-4">
         <div>
