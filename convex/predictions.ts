@@ -2,14 +2,28 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 export const getPredictions = query({
-  args: { limit: v.optional(v.number()) },
+  args: {
+    limit: v.optional(v.number()),
+    filter: v.optional(v.union(v.literal("all"), v.literal("unresolved"), v.literal("correct"), v.literal("incorrect"))),
+  },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 20;
-    const predictions = await ctx.db
+    const filter = args.filter ?? "all";
+
+    let predictions = await ctx.db
       .query("predictions")
       .withIndex("by_created_at")
       .order("desc")
       .take(limit);
+
+    if (filter !== "all") {
+      predictions = predictions.filter((p) => {
+        if (filter === "unresolved") return p.resolvedAs === undefined;
+        if (filter === "correct") return p.resolvedAs === "correct";
+        if (filter === "incorrect") return p.resolvedAs === "incorrect";
+        return true;
+      });
+    }
 
     const predictionsWithAuthors = await Promise.all(
       predictions.map(async (pred) => {

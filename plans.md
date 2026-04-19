@@ -4,7 +4,7 @@ Stack: Solid + Convex + AT Proto (no custom PDS)
 
 ## Next Steps
 
-### 1. Author-Only Resolution ✅
+### 1. Author-Only Resolution ✅✅
 
 Only show "Mark Correct/Incorrect" buttons to the prediction author.
 
@@ -14,7 +14,7 @@ Only show "Mark Correct/Incorrect" buttons to the prediction author.
 - Only render resolve buttons when `pred.authorDid === currentUserDid`
 - Current user DID available via cookie regex
 
-### 2. Filter by Status
+### 2. Filter by Status ✅
 
 Add tabs or buttons to filter: All / Unresolved / Correct / Incorrect.
 
@@ -45,7 +45,40 @@ Deploy to production (Vercel/Netlify + Convex cloud).
 - Deploy frontend to Vercel: `pnpm deploy` or manual connect
 - Move Tap to production server or configure production webhook URL
 
-### 5. Error Handling
+### 5. Design System
+
+Add shared styles for light/dark mode and components.
+
+**Implementation:**
+
+- Add light/dark mode toggle (persist to localStorage)
+- Extract shared button styles as CSS classes
+- Use Tailwind CSS or CSS variables for theming
+- Apply theme to all components
+
+### 6. Make Deadline Optional
+
+Allow creating predictions without a deadline.
+
+**Implementation:**
+
+- Remove required deadline from form in `src/routes/new.tsx`
+- Update Convex schema: `deadline` already optional
+- No schema changes needed
+
+### 6. Voting on Predictions
+
+Allow users to vote on predictions: agree/disagree, and resolve-true/resolve-false.
+
+**Implementation:**
+
+- Add `votes` table to Convex schema (predictionId, voterDid, agree, resolvedAs)
+- Add vote mutation
+- Add get votes query for a prediction
+- Show vote buttons on each prediction card
+- Display vote counts
+
+### 7. Error Handling
 
 Better error messages for failed predictions, OAuth issues, etc.
 

@@ -1,5 +1,12 @@
 import { ConvexClient } from "convex/browser";
-import { Context, createContext, createSignal, onCleanup, useContext } from "solid-js";
+import {
+  Context,
+  createContext,
+  createSignal,
+  onCleanup,
+  useContext,
+  createEffect,
+} from "solid-js";
 import { isServer } from "solid-js/web";
 import type { FunctionArgs, FunctionReturnType, FunctionReference } from "convex/server";
 
@@ -10,7 +17,7 @@ type MutationFn = FunctionReference<"mutation", "public">;
 
 export function createQuery<Q extends QueryFn>(
   query: Q,
-  args?: FunctionArgs<Q>,
+  args: () => FunctionArgs<Q>,
 ): () => FunctionReturnType<Q> | undefined {
   if (isServer) return () => undefined;
 
@@ -19,13 +26,18 @@ export function createQuery<Q extends QueryFn>(
 
   const [data, setData] = createSignal<FunctionReturnType<Q> | undefined>(undefined);
 
-  const unsub = convex.onUpdate(query, (args ?? {}) as Record<string, unknown>, (value) => {
-    setData(() => value as FunctionReturnType<Q>);
+  createEffect(() => {
+    const currentArgs = args();
+    setData(undefined);
+
+    const unsub = convex.onUpdate(query, currentArgs as Record<string, unknown>, (value) => {
+      setData(() => value as FunctionReturnType<Q>);
+    });
+
+    onCleanup(unsub);
   });
 
-  onCleanup(unsub);
-
-  return () => data();
+  return data;
 }
 
 export function createMutation<M extends MutationFn>(mutation: M) {

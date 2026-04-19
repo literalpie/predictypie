@@ -1,7 +1,7 @@
 import { For, Show, createMemo } from "solid-js";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
-import { action, redirect, useAction } from "@solidjs/router";
+import { action, redirect, useAction, useSearchParams } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
 import { resolvePrediction as resolvePredictionOnPds } from "~/server/createPrediction";
 
@@ -24,11 +24,18 @@ function getCurrentDid(): string | undefined {
 }
 
 export default function Home() {
-  const predictions = createQuery(api.predictions.getPredictions, {});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = () => (searchParams.filter as "all" | "unresolved" | "correct" | "incorrect") ?? "all";
+  
+  const predictions = createQuery(api.predictions.getPredictions, () => ({ filter: filter() }));
   const resolvePrediction = useAction(resolveAction);
   const currentDid = createMemo(() => getCurrentDid());
 
   const isAuthor = (authorDid: string) => currentDid() === authorDid;
+
+  const setFilter = (f: string) => {
+    setSearchParams({ filter: f });
+  };
 
   return (
     <main class="max-w-2xl mx-auto p-4">
@@ -43,6 +50,33 @@ export default function Home() {
           </a>
         </nav>
       </header>
+
+      <div class="flex gap-2 mb-4">
+        <button
+          onClick={() => setFilter("all")}
+          class={`px-3 py-1 rounded ${filter() === "all" ? "bg-blue-600 text-white" : "bg-zinc-200"}`}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setFilter("unresolved")}
+          class={`px-3 py-1 rounded ${filter() === "unresolved" ? "bg-blue-600 text-white" : "bg-zinc-200"}`}
+        >
+          Unresolved
+        </button>
+        <button
+          onClick={() => setFilter("correct")}
+          class={`px-3 py-1 rounded ${filter() === "correct" ? "bg-blue-600 text-white" : "bg-zinc-200"}`}
+        >
+          Correct
+        </button>
+        <button
+          onClick={() => setFilter("incorrect")}
+          class={`px-3 py-1 rounded ${filter() === "incorrect" ? "bg-blue-600 text-white" : "bg-zinc-200"}`}
+        >
+          Incorrect
+        </button>
+      </div>
 
       <Show when={predictions()} fallback={<p>Loading predictions...</p>}>
         <Show
