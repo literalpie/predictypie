@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js";
+import { For, Show, createMemo } from "solid-js";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { action, redirect, useAction } from "@solidjs/router";
@@ -17,9 +17,18 @@ const resolveAction = action(async (formData: FormData) => {
   throw redirect("/");
 }, "resolvePrediction");
 
+function getCurrentDid(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const match = document.cookie.match(/(?:^|;)did=([^;]+)/);
+  return match ? match[1] : undefined;
+}
+
 export default function Home() {
   const predictions = createQuery(api.predictions.getPredictions, {});
   const resolvePrediction = useAction(resolveAction);
+  const currentDid = createMemo(() => getCurrentDid());
+
+  const isAuthor = (authorDid: string) => currentDid() === authorDid;
 
   return (
     <main class="max-w-2xl mx-auto p-4">
@@ -36,9 +45,10 @@ export default function Home() {
       </header>
 
       <Show when={predictions()} fallback={<p>Loading predictions...</p>}>
-        <Show when={(predictions() ?? []).length} fallback={
-          <p class="text-zinc-500">No predictions yet. Be the first!</p>
-        }>
+        <Show
+          when={(predictions() ?? []).length}
+          fallback={<p class="text-zinc-500">No predictions yet. Be the first!</p>}
+        >
           <ul class="space-y-3">
             <For each={predictions()}>
               {(pred) => (
@@ -56,30 +66,35 @@ export default function Home() {
                         [{pred.resolvedAs === "correct" ? "✓ Correct" : "✗ Incorrect"}]
                       </span>
                     ) : (
-                      <div class="ml-auto flex gap-2">
-                        <button
-                          onClick={() => {
-                            const fd = new FormData();
-                            fd.set("atUri", pred.atUri);
-                            fd.set("resolvedAs", "correct");
-                            resolvePrediction(fd);
-                          }}
-                          class="text-green-600 hover:underline text-xs"
-                        >
-                          Mark Correct
-                        </button>
-                        <button
-                          onClick={() => {
-                            const fd = new FormData();
-                            fd.set("atUri", pred.atUri);
-                            fd.set("resolvedAs", "incorrect");
-                            resolvePrediction(fd);
-                          }}
-                          class="text-red-600 hover:underline text-xs"
-                        >
-                          Mark Incorrect
-                        </button>
-                      </div>
+                      <Show
+                        when={isAuthor(pred.authorDid)}
+                        fallback={<span class="text-zinc-400 text-xs">Pending resolution</span>}
+                      >
+                        <div class="ml-auto flex gap-2">
+                          <button
+                            onClick={() => {
+                              const fd = new FormData();
+                              fd.set("atUri", pred.atUri);
+                              fd.set("resolvedAs", "correct");
+                              resolvePrediction(fd);
+                            }}
+                            class="text-green-600 hover:underline text-xs"
+                          >
+                            Mark Correct
+                          </button>
+                          <button
+                            onClick={() => {
+                              const fd = new FormData();
+                              fd.set("atUri", pred.atUri);
+                              fd.set("resolvedAs", "incorrect");
+                              resolvePrediction(fd);
+                            }}
+                            class="text-red-600 hover:underline text-xs"
+                          >
+                            Mark Incorrect
+                          </button>
+                        </div>
+                      </Show>
                     )}
                   </div>
                 </li>

@@ -1,92 +1,57 @@
-# PredictyPie v2.0 Plan
+# PredictyPie
 
 Stack: Solid + Convex + AT Proto (no custom PDS)
 
-## Status
+## Next Steps
 
-- Phase 1: ✅ Complete
-- Phase 2: ✅ Lexicon defined (src/lexicons/app.predictypie/prediction.ts)
-- Phase 3: ✅ Convex schema deployed (convex/schema.ts)
-- Phase 4: ✅ OAuth client + routes created
-- Phase 5: ⚠️ SSR works, client-side fetch in progress
-- Phase 6: ⏳ Not started
+### 1. Author-Only Resolution ✅
 
-## To Run
+Only show "Mark Correct/Incorrect" buttons to the prediction author.
 
-```bash
-pnpm convex dev --start 'vite dev --port 3001'
-```
+**Implementation:**
 
-## Phase 1: Hello World ✅
+- In `src/routes/index.tsx`, get current user DID from cookie
+- Only render resolve buttons when `pred.authorDid === currentUserDid`
+- Current user DID available via cookie regex
 
-- Delete: `src/routes/(home).tsx`, `src/routes/prediction/`, `src/loadPredictions.tsx`, `src/mocks.ts`, `supabase/functions/`
-- Update dependencies (use `reference-package-json.md`)
-- Add Convex + Tailwind config
-- Minimal hello world route
+### 2. Filter by Status
 
-## Phase 2: Custom Lexicon ✅
+Add tabs or buttons to filter: All / Unresolved / Correct / Incorrect.
 
-```json
-{
-  "lexicon": 1,
-  "id": "app.predictypie.prediction",
-  "defs": {
-    "main": {
-      "type": "record",
-      "key": "tid",
-      "record": {
-        "text": { "type": "string", "maxGraphemes": 500 },
-        "deadline": { "type": "datetime", "nullable": true }
-      }
-    }
-  }
-}
-```
+**Implementation:**
 
-## Phase 3: Convex Schema + Mirror ✅
+- Add query param or state for filter: `filter: "all" | "unresolved" | "correct" | "incorrect"`
+- Create new Convex query or filter in existing query
+- Add filter buttons to `src/routes/index.tsx`
 
-- **users**: `did` (key), `handle`
-- **predictions**: `rkey` (key), `atUri`, `authorDid`, `text`, `deadline`, `createdAt`, `resolvedAs`
-- **authStates**, **sessions**: for OAuth
-- Firehose consumer → NOT YET (need webhook or firehose setup)
+### 3. User Profile Page
 
-## Phase 4: OAuth + Create ✅
+Show all predictions by a specific user at `/user/:identifier`.
 
-- AT Proto OAuth client (src/auth/client.ts)
-- Create form: text + optional deadline
-- Submit → `com.atproto.repo.createRecord` on user's PDS
+**Implementation:**
 
-## Phase 5: Browse UI ⚠️
+- Create `src/routes/user/[identifier].tsx`
+- Query predictions by `authorDid` (resolve handle to DID if needed)
+- Show user's handle + all their predictions
 
-- List predictions from Convex
-- Show: text, author (via users table), deadline, resolution status
-- Issue: SSR query fails (needs fix), client-side works
+### 4. Deployment
 
-## Phase 6: Resolve ⏳
+Deploy to production (Vercel/Netlify + Convex cloud).
 
-- Author-only: update `resolvedAs` to `correct`/`incorrect`
-- Calls `com.atproto.repo.updateRecord` on their PDS
+**Implementation:**
 
-## File Structure
+- Push Convex: `npx convex deploy` (creates production deployment)
+- Add `CONVEX_DEPLOYMENT_URL` and `CONVEX_DEPLOYMENT_KEY` env vars
+- Deploy frontend to Vercel: `pnpm deploy` or manual connect
+- Move Tap to production server or configure production webhook URL
 
-```
-src/
-├── auth/client.ts           # OAuth client
-├── components/LoginForm.tsx
-├── lib/
-│   ├── convex.tsx        # Convex queries
-│   └── contextHttpClient.ts
-├── routes/
-│   ├── index.tsx        # Home
-│   ├── new.tsx          # Create form
-│   ├── api/new.ts       # Create API
-│   ├── session.ts
-│   └── oauth/
-│       ├── login.ts
-│       └── callback.ts
-├── lexicons/app.predictypie/prediction.ts
-convex/
-├── schema.ts
-├── predictions.ts
-└── auth.ts
-```
+### 5. Error Handling
+
+Better error messages for failed predictions, OAuth issues, etc.
+
+**Implementation:**
+
+- Add error state + display in `src/routes/new.tsx`
+- Add error display in OAuth flows (`callback.ts`, `login-api.ts`)
+- Show user-friendly messages instead of raw errors
+- Consider adding error logging to external service (optional)
