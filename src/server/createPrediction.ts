@@ -12,9 +12,8 @@ async function addRepoToTap(did: string) {
   try {
     const tap = new Tap(TAP_URL, { adminPassword: TAP_ADMIN_PASSWORD });
     await tap.addRepos([did]);
-    console.log(`Added repo to Tap: ${did}`);
-  } catch (err) {
-    console.error("Failed to add repo to Tap:", err);
+  } catch {
+    // Silent fail
   }
 }
 
@@ -29,8 +28,6 @@ export const createPrediction = async (did: string, text: string, deadline?: str
     deadline: deadline ? l.toDatetimeString(new Date(deadline)) : now,
     createdAt: now,
   });
-
-  console.log("PDS write succeeded:", result.uri);
 
   await addRepoToTap(did);
 
@@ -61,6 +58,4 @@ export const resolvePrediction = async (
     },
     { rkey }
   );
-
-  console.log("PDS update succeeded:", atUri);
 };

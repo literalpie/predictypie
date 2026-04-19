@@ -40,7 +40,7 @@ export async function POST({ request }: { request: Request }) {
 
     if (evt.action === "create" || evt.action === "update") {
       const handle = await resolveHandle(evt.did);
-      await convexHttpClient.mutation(api.predictions.createPrediction, {
+await convexHttpClient.mutation(api.predictions.createPrediction, {
         rkey: evt.rkey,
         atUri: uri.toString(),
         authorDid: evt.did,
@@ -49,11 +49,10 @@ export async function POST({ request }: { request: Request }) {
         createdAt: record.createdAt,
         resolvedAs: record.resolvedAs,
       });
+
       if (handle) {
         await convexHttpClient.mutation(api.predictions.upsertUser, { did: evt.did, handle });
       }
-
-      console.log(`Stored prediction: ${uri.toString()}`);
     }
   }
 
