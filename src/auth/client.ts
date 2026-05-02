@@ -16,8 +16,7 @@ const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 function getClientMetadata(): OAuthClientMetadataInput {
-  if (PUBLIC_URL) {
-    console.log("Using public URL for client metadata:", PUBLIC_URL);
+  if (PUBLIC_URL && PRIVATE_KEY) {
     return {
       client_id: `${PUBLIC_URL}/oauth/client-metadata.json`,
       client_name: "PredictyPie",
