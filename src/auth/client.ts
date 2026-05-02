@@ -28,7 +28,7 @@ function getClientMetadata(): OAuthClientMetadataInput {
       scope: SCOPE,
       token_endpoint_auth_method: "private_key_jwt" as const,
       token_endpoint_auth_signing_alg: "ES256" as const,
-      jwks_uri: `${PUBLIC_URL}/.well-known/jwks.json`,
+      jwks_uri: `${PUBLIC_URL}/jwks.json`,
       dpop_bound_access_tokens: true,
     };
   }

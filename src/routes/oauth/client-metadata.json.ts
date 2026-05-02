@@ -17,7 +17,7 @@ export async function GET() {
       token_endpoint_auth_method: tokenEndpointAuthMethod,
       ...(process.env.PRIVATE_KEY && {
         token_endpoint_auth_signing_alg: "ES256",
-        jwks_uri: `${BASE_URL}/.well-known/jwks.json`,
+        jwks_uri: `${BASE_URL}/jwks.json`,
         dpop_bound_access_tokens: true,
       }),
       scope: "atproto repo:app.predictypie.prediction",
