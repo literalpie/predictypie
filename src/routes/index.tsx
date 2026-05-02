@@ -3,9 +3,14 @@ import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { action, redirect, useAction, useSearchParams, query } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
-import { resolvePrediction as resolvePredictionOnPds, deletePrediction as deletePredictionOnPds } from "~/server/createPrediction";
+import {
+  resolvePrediction as resolvePredictionOnPds,
+  deletePrediction as deletePredictionOnPds,
+} from "~/server/createPrediction";
 import Button from "../components/Button";
 import ThemeToggle from "../components/ThemeToggle";
+
+const PUBLIC_URL = process.env.VITE_PUBLIC_URL || "http://127.0.0.1:3000";
 
 const resolveAction = action(async (formData: FormData) => {
   "use server";
@@ -68,7 +73,7 @@ export default function Home() {
           </a>
         </nav>
       </header>
-
+      url: {PUBLIC_URL}
       <div class="flex gap-2 mb-4">
         <Button variant="secondary" active={filter() === "all"} onClick={() => setFilter("all")}>
           All
@@ -95,7 +100,6 @@ export default function Home() {
           Incorrect
         </Button>
       </div>
-
       <Show
         when={predictions()}
         fallback={<p class="text-zinc-500 dark:text-zinc-400">Loading predictions...</p>}
