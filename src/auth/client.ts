@@ -31,11 +31,6 @@ function getClientMetadata(): OAuthClientMetadataInput {
       dpop_bound_access_tokens: true,
     };
   }
-  console.log(
-    "no public url",
-    import.meta.env.VITE_PUBLIC_URL,
-    import.meta.env.VITE_PUBLIC_URL,
-  );
   return buildAtprotoLoopbackClientMetadata({
     scope: SCOPE,
     redirect_uris: ["http://127.0.0.1:3000/oauth/callback"],

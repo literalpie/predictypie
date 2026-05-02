@@ -5,17 +5,9 @@ import { redirect } from "@solidjs/router";
 import { getOAuthClient } from "~/auth/client";
 
 const PUBLIC_URL =
-  process.env.DEPLOY_PRIME_URL ||
-  import.meta.env.VITE_PUBLIC_URL ||
-  "http://127.0.0.1:3001";
+  process.env.DEPLOY_PRIME_URL || import.meta.env.VITE_PUBLIC_URL || "http://127.0.0.1:3001";
 
 export async function POST({ nativeEvent }: APIEvent) {
-  console.log(
-    "url",
-    import.meta.env.VITE_PUBLIC_URL,
-    import.meta.env.VITE_PUBLIC_URL,
-    PUBLIC_URL,
-  );
   try {
     const client = await getOAuthClient();
     // Get DID from cookie

@@ -11,7 +11,6 @@ import Button from "../components/Button";
 import ThemeToggle from "../components/ThemeToggle";
 
 const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || "http://127.0.0.1:3000";
-console.log("public url", PUBLIC_URL);
 
 const resolveAction = action(async (formData: FormData) => {
   "use server";

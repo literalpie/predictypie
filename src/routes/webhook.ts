@@ -21,7 +21,6 @@ async function resolveHandle(did: string): Promise<string | null> {
 }
 
 export async function POST({ request }: { request: Request }) {
-  console.log("got a webhook event");
   const authHeader = request.headers.get("Authorization");
   if (!authHeader) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });

@@ -9,10 +9,8 @@ import { getOAuthClient } from "~/auth/client";
 const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || "http://127.0.0.1:3000";
 
 export async function GET(request: APIEvent) {
-  console.log("url", PUBLIC_URL);
   try {
-    if (!request.nativeEvent)
-      throw redirect(`${PUBLIC_URL}/?error=missing_event`);
+    if (!request.nativeEvent) throw redirect(`${PUBLIC_URL}/?error=missing_event`);
 
     const params = new URL(request.request.url).searchParams;
     const client = await getOAuthClient();
