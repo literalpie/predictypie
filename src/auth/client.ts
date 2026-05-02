@@ -9,10 +9,11 @@ import {
 } from "@atproto/oauth-client-node";
 import { api } from "../../convex/_generated/api";
 import { convexHttpClient } from "../lib/contextHttpClient";
+import { getPublicUrl } from "~/lib/getPublicUrl";
 
 export const SCOPE = "atproto repo:app.predictypie.prediction";
 
-const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL;
+const PUBLIC_URL = getPublicUrl();
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 function getClientMetadata(): OAuthClientMetadataInput {

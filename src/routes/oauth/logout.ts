@@ -3,9 +3,9 @@ import { APIEvent } from "@solidjs/start/server";
 import { deleteCookie, getCookie } from "@solidjs/start/http";
 import { redirect } from "@solidjs/router";
 import { getOAuthClient } from "~/auth/client";
+import { getPublicUrl } from "~/lib/getPublicUrl";
 
-const PUBLIC_URL =
-  process.env.DEPLOY_PRIME_URL || import.meta.env.VITE_PUBLIC_URL || "http://127.0.0.1:3001";
+const PUBLIC_URL = getPublicUrl();
 
 export async function POST({ nativeEvent }: APIEvent) {
   try {

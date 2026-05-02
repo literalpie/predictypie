@@ -5,8 +5,9 @@ import { setCookie } from "@solidjs/start/http";
 import { redirect } from "@solidjs/router";
 
 import { getOAuthClient } from "~/auth/client";
+import { getPublicUrl } from "~/lib/getPublicUrl";
 
-const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || "http://127.0.0.1:3000";
+const PUBLIC_URL = getPublicUrl();
 
 export async function GET(request: APIEvent) {
   try {
