@@ -1,20 +1,53 @@
 "use server";
 import {
   NodeOAuthClient,
+  JoseKey,
+  Keyset,
   buildAtprotoLoopbackClientMetadata,
   requestLocalLock,
+  type OAuthClientMetadataInput,
 } from "@atproto/oauth-client-node";
 import { api } from "../../convex/_generated/api";
 import { convexHttpClient } from "../lib/contextHttpClient";
 
 export const SCOPE = "atproto repo:app.predictypie.prediction";
 
+const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+
+function getClientMetadata(): OAuthClientMetadataInput {
+  if (PUBLIC_URL && PRIVATE_KEY) {
+    return {
+      client_id: `${PUBLIC_URL}/oauth/client-metadata.json`,
+      client_name: "PredictyPie",
+      client_uri: PUBLIC_URL,
+      redirect_uris: [`${PUBLIC_URL}/oauth/callback`],
+      grant_types: ["authorization_code", "refresh_token"],
+      response_types: ["code"],
+      scope: SCOPE,
+      token_endpoint_auth_method: "private_key_jwt" as const,
+      token_endpoint_auth_signing_alg: "ES256" as const,
+      jwks_uri: `${PUBLIC_URL}/jwks.json`,
+      dpop_bound_access_tokens: true,
+    };
+  }
+  return buildAtprotoLoopbackClientMetadata({
+    scope: SCOPE,
+    redirect_uris: ["http://127.0.0.1:3000/oauth/callback"],
+  });
+}
+
+async function getKeyset(): Promise<Keyset | undefined> {
+  if (PUBLIC_URL && PRIVATE_KEY) {
+    return new Keyset([await JoseKey.fromJWK(JSON.parse(PRIVATE_KEY))]);
+  }
+  return undefined;
+}
+
 export async function getOAuthClient(): Promise<NodeOAuthClient> {
   return new NodeOAuthClient({
-    clientMetadata: buildAtprotoLoopbackClientMetadata({
-      scope: SCOPE,
-      redirect_uris: ["http://127.0.0.1:3000/oauth/callback"],
-    }),
+    clientMetadata: getClientMetadata(),
+    keyset: await getKeyset(),
     requestLock: requestLocalLock,
     stateStore: {
       set: async (key, state) => {
@@ -30,10 +63,15 @@ export async function getOAuthClient(): Promise<NodeOAuthClient> {
     },
     sessionStore: {
       set: async (sub, sessionData) => {
-        await convexHttpClient.mutation(api.auth.setSession, { did: sub, session: sessionData });
+        await convexHttpClient.mutation(api.auth.setSession, {
+          did: sub,
+          session: sessionData,
+        });
       },
       get: async (sub) => {
-        const result = await convexHttpClient.query(api.auth.getSession, { did: sub });
+        const result = await convexHttpClient.query(api.auth.getSession, {
+          did: sub,
+        });
         return result ? result.session : undefined;
       },
       del: async (sub) => {

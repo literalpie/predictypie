@@ -3,7 +3,7 @@ import { APIEvent } from "@solidjs/start/server";
 import { json } from "@solidjs/router";
 import { getOAuthClient, SCOPE } from "~/auth/client";
 
-export async function POST({ request, nativeEvent }: APIEvent) {
+export async function POST({ request }: APIEvent) {
   try {
     const { handle } = await request.json();
 
@@ -11,13 +11,7 @@ export async function POST({ request, nativeEvent }: APIEvent) {
       return json({ error: "Handle is required" }, { status: 400 });
     }
 
-    // Get the base URL from the request
-    const protocol = nativeEvent?.socket?.encrypted ? "https" : "http";
-    const host =
-      request.headers.get("x-forwarded-host") || request.headers.get("host") || "127.0.0.1:3001";
-    const baseUrl = `${protocol}://${host}`;
-
-    const client = await getOAuthClient(baseUrl);
+    const client = await getOAuthClient();
     const authUrl = await client.authorize(handle, {
       scope: SCOPE,
     });
