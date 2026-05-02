@@ -6,7 +6,7 @@ import { redirect } from "@solidjs/router";
 
 import { getOAuthClient } from "~/auth/client";
 
-const PUBLIC_URL = process.env.DEPLOY_PRIME_URL || "http://127.0.0.1:3000";
+const PUBLIC_URL = process.env.PUBLIC_URL || "http://127.0.0.1:3000";
 
 export async function GET(request: APIEvent) {
   try {
