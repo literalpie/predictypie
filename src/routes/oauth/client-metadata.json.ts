@@ -1,9 +1,7 @@
 "use server";
-import { APIEvent } from "@solidjs/start/server";
-
 const BASE_URL = "https://predictypie.local";
 
-export async function GET({ nativeEvent }: APIEvent) {
+export async function GET() {
   return new Response(
     JSON.stringify({
       client_id: `${BASE_URL}/oauth/client-metadata.json`,

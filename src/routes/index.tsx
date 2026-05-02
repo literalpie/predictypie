@@ -1,7 +1,7 @@
 import { For, Show, createResource } from "solid-js";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
-import { action, redirect, useAction, useSearchParams, cache, query } from "@solidjs/router";
+import { action, redirect, useAction, useSearchParams, query } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
 import { resolvePrediction as resolvePredictionOnPds } from "~/server/createPrediction";
 import Button from "../components/Button";
@@ -30,19 +30,20 @@ async function loadSessionDid() {
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const filter = () => (searchParams.filter as "all" | "unresolved" | "correct" | "incorrect") ?? "all";
-  
+  const filter = () =>
+    (searchParams.filter as "all" | "unresolved" | "correct" | "incorrect") ?? "all";
+
   const predictions = createQuery(api.predictions.getPredictions, () => ({ filter: filter() }));
   const resolvePrediction = useAction(resolveAction);
   const [sessionDid] = createResource(loadSessionDid);
-  
+
   const isAuthor = (authorDid: string) => sessionDid() === authorDid;
 
   const setFilter = (f: string) => {
     setSearchParams({ filter: f });
   };
 
-return (
+  return (
     <main class="max-w-2xl mx-auto p-4 min-h-screen">
       <header class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">PredictyPie</h1>
@@ -58,16 +59,41 @@ return (
       </header>
 
       <div class="flex gap-2 mb-4">
-        <Button variant="secondary" active={filter() === "all"} onClick={() => setFilter("all")}>All</Button>
-        <Button variant="secondary" active={filter() === "unresolved"} onClick={() => setFilter("unresolved")}>Unresolved</Button>
-        <Button variant="secondary" active={filter() === "correct"} onClick={() => setFilter("correct")}>Correct</Button>
-        <Button variant="secondary" active={filter() === "incorrect"} onClick={() => setFilter("incorrect")}>Incorrect</Button>
+        <Button variant="secondary" active={filter() === "all"} onClick={() => setFilter("all")}>
+          All
+        </Button>
+        <Button
+          variant="secondary"
+          active={filter() === "unresolved"}
+          onClick={() => setFilter("unresolved")}
+        >
+          Unresolved
+        </Button>
+        <Button
+          variant="secondary"
+          active={filter() === "correct"}
+          onClick={() => setFilter("correct")}
+        >
+          Correct
+        </Button>
+        <Button
+          variant="secondary"
+          active={filter() === "incorrect"}
+          onClick={() => setFilter("incorrect")}
+        >
+          Incorrect
+        </Button>
       </div>
 
-      <Show when={predictions()} fallback={<p class="text-zinc-500 dark:text-zinc-400">Loading predictions...</p>}>
+      <Show
+        when={predictions()}
+        fallback={<p class="text-zinc-500 dark:text-zinc-400">Loading predictions...</p>}
+      >
         <Show
           when={(predictions() ?? []).length}
-          fallback={<p class="text-zinc-500 dark:text-zinc-400">No predictions yet. Be the first!</p>}
+          fallback={
+            <p class="text-zinc-500 dark:text-zinc-400">No predictions yet. Be the first!</p>
+          }
         >
           <ul class="space-y-3">
             <For each={predictions()}>
@@ -80,7 +106,13 @@ return (
                       <span> · Deadline: {new Date(pred.deadline).toLocaleDateString()}</span>
                     )}
                     {pred.resolvedAs ? (
-                      <span class={pred.resolvedAs === "correct" ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                      <span
+                        class={
+                          pred.resolvedAs === "correct"
+                            ? "text-green-600 dark:text-green-400"
+                            : "text-red-600 dark:text-red-400"
+                        }
+                      >
                         [{pred.resolvedAs === "correct" ? "✓ Correct" : "✗ Incorrect"}]
                       </span>
                     ) : (
@@ -89,7 +121,7 @@ return (
                         fallback={<span class="text-xs text-zinc-400">Pending resolution</span>}
                       >
                         <div class="ml-auto flex gap-2">
-                          <Button 
+                          <Button
                             variant="success"
                             onClick={() => {
                               const fd = new FormData();
@@ -97,8 +129,10 @@ return (
                               fd.set("resolvedAs", "correct");
                               resolvePrediction(fd);
                             }}
-                          >Mark Correct</Button>
-                          <Button 
+                          >
+                            Mark Correct
+                          </Button>
+                          <Button
                             variant="error"
                             onClick={() => {
                               const fd = new FormData();
@@ -106,7 +140,9 @@ return (
                               fd.set("resolvedAs", "incorrect");
                               resolvePrediction(fd);
                             }}
-                          >Mark Incorrect</Button>
+                          >
+                            Mark Incorrect
+                          </Button>
                         </div>
                       </Show>
                     )}

@@ -1,5 +1,13 @@
 import { ConvexClient } from "convex/browser";
-import { Context, createContext, createSignal, onCleanup, useContext, createEffect, on } from "solid-js";
+import {
+  Context,
+  createContext,
+  createSignal,
+  onCleanup,
+  useContext,
+  createEffect,
+  on,
+} from "solid-js";
 import { isServer } from "solid-js/web";
 import type { FunctionArgs, FunctionReturnType, FunctionReference } from "convex/server";
 
@@ -19,18 +27,21 @@ export function createQuery<Q extends QueryFn>(
 
   const [data, setData] = createSignal<FunctionReturnType<Q> | undefined>(undefined);
 
-  const getArgs = typeof args === "function" ? args : () => args ?? {};
+  const getArgs: () => Record<string, unknown> =
+    typeof args === "function" ? args : () => args ?? {};
 
-  createEffect(on(getArgs, () => {
-    const currentArgs = getArgs();
-    setData(undefined);
-    
-    const unsub = convex.onUpdate(query, currentArgs as Record<string, unknown>, (value) => {
-      setData(() => value as FunctionReturnType<Q>);
-    });
+  createEffect(
+    on(getArgs, () => {
+      const currentArgs = getArgs();
+      setData(undefined);
 
-    onCleanup(unsub);
-  }));
+      const unsub = convex.onUpdate(query, currentArgs as Record<string, unknown>, (value) => {
+        setData(() => value as FunctionReturnType<Q>);
+      });
+
+      onCleanup(unsub);
+    }),
+  );
 
   return () => data();
 }

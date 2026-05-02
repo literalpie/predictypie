@@ -35,17 +35,11 @@ const Button: Component<ButtonProps> = (props) => {
         : "ring-2 ring-blue-500 dark:ring-blue-400"
       : "";
 
-    return [base, variantClasses, activeStyles, local.class]
-      .filter(Boolean)
-      .join(" ");
+    return [base, variantClasses, activeStyles, local.class].filter(Boolean).join(" ");
   });
 
   return (
-    <button
-      class={className()}
-      aria-pressed={local.active}
-      {...rest}
-    >
+    <button class={className()} aria-pressed={local.active} {...rest}>
       {local.children}
     </button>
   );

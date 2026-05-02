@@ -4,7 +4,14 @@ import { mutation, query } from "./_generated/server";
 export const getPredictions = query({
   args: {
     limit: v.optional(v.number()),
-    filter: v.optional(v.union(v.literal("all"), v.literal("unresolved"), v.literal("correct"), v.literal("incorrect"))),
+    filter: v.optional(
+      v.union(
+        v.literal("all"),
+        v.literal("unresolved"),
+        v.literal("correct"),
+        v.literal("incorrect"),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const limit = args.limit ?? 20;
