@@ -10,8 +10,6 @@ import {
 import Button from "../components/Button";
 import ThemeToggle from "../components/ThemeToggle";
 
-const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL || "http://127.0.0.1:3000";
-
 const resolveAction = action(async (formData: FormData) => {
   "use server";
   const did = getCookie("did");
@@ -73,7 +71,6 @@ export default function Home() {
           </a>
         </nav>
       </header>
-      url: {PUBLIC_URL}
       <div class="flex gap-2 mb-4">
         <Button variant="secondary" active={filter() === "all"} onClick={() => setFilter("all")}>
           All

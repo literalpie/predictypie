@@ -1,10 +1,11 @@
 "use server";
-const BASE_URL = import.meta.env.VITE_PUBLIC_URL || "https://predictypie.local";
+
+import { getPublicUrl } from "~/lib/getPublicUrl";
+
+const BASE_URL = getPublicUrl();
 
 export async function GET() {
-  const tokenEndpointAuthMethod = process.env.PRIVATE_KEY
-    ? "private_key_jwt"
-    : "none";
+  const tokenEndpointAuthMethod = process.env.PRIVATE_KEY ? "private_key_jwt" : "none";
 
   return new Response(
     JSON.stringify({
