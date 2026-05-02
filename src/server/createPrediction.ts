@@ -13,12 +13,17 @@ async function addRepoToTap(did: string) {
   try {
     const tap = new Tap(TAP_URL, { adminPassword: TAP_ADMIN_PASSWORD });
     await tap.addRepos([did]);
-  } catch {
+  } catch (error) {
+    console.warn("Failed to add repo to TAP:", error);
     // Silent fail
   }
 }
 
-export const createPrediction = async (did: string, text: string, deadline?: string) => {
+export const createPrediction = async (
+  did: string,
+  text: string,
+  deadline?: string,
+) => {
   const now = l.toDatetimeString(new Date());
   const client = await getOAuthClient();
   const oauthSession = await client.restore(did);
