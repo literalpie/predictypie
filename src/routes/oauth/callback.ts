@@ -10,7 +10,7 @@ const PUBLIC_URL = "http://127.0.0.1:3000";
 
 export async function GET(request: APIEvent) {
   try {
-    if (!request.nativeEvent) return undefined;
+    if (!request.nativeEvent) throw redirect(`${PUBLIC_URL}/?error=missing_event`);
 
     const params = new URL(request.request.url).searchParams;
     const client = await getOAuthClient();

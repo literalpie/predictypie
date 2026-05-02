@@ -14,8 +14,7 @@ const getInitialTheme = (): Theme => {
 
   const match = document.cookie.match(/(?:^|;)theme=([^;]+)/);
   if (match) return match[1] as Theme;
-  if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
-  return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 };
 
 const setThemeCookie = (theme: Theme) => {
@@ -30,11 +29,15 @@ createEffect(() => {
   if (isServer) return;
   const current = theme();
   document.documentElement.classList.toggle("dark", current === "dark");
-  setThemeCookie(current);
+  document.documentElement.style.colorScheme = current;
 });
 
 export function toggleTheme() {
-  setTheme((t) => (t === "light" ? "dark" : "light"));
+  setTheme((t) => {
+    const newTheme = t === "light" ? "dark" : "light";
+    setThemeCookie(newTheme);
+    return newTheme;
+  });
 }
 
 export { theme };

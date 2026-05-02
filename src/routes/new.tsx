@@ -20,7 +20,7 @@ const createPredictionAction = action(async (formData: FormData) => {
 
   await createPredictionToPds(did, text, deadline || undefined);
 
-  throw redirect("/");
+  return redirect("/");
 }, "createPrediction");
 
 export default function NewPrediction() {
