@@ -45,7 +45,7 @@ Deploy to production (Vercel/Netlify + Convex cloud).
 - Deploy frontend to Vercel: `pnpm deploy` or manual connect
 - Move Tap to production server or configure production webhook URL
 
-### 5. Design System
+### 5. Design System ✅ (light/dark, Tailwind)
 
 Add shared styles for light/dark mode and components.
 
