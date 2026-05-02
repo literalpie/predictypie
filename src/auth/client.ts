@@ -17,6 +17,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 function getClientMetadata(): OAuthClientMetadataInput {
   if (PUBLIC_URL) {
+    console.log("Using public URL for client metadata:", PUBLIC_URL);
     return {
       client_id: `${PUBLIC_URL}/oauth/client-metadata.json`,
       client_name: "PredictyPie",
@@ -31,6 +32,11 @@ function getClientMetadata(): OAuthClientMetadataInput {
       dpop_bound_access_tokens: true,
     };
   }
+  console.log(
+    "no public url",
+    process.env.VITE_PUBLIC_URL,
+    import.meta.env.VITE_PUBLIC_URL,
+  );
   return buildAtprotoLoopbackClientMetadata({
     scope: SCOPE,
     redirect_uris: ["http://127.0.0.1:3000/oauth/callback"],
