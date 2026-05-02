@@ -1,0 +1,33 @@
+{
+  "id": "app.predictypie.prediction",
+  "defs": {
+    "main": {
+      "key": "tid",
+      "type": "record",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt", "deadline"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxGraphemes": 500
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "resolvedAs": {
+            "type": "string",
+            "enum": ["correct", "incorrect"]
+          }
+        }
+      }
+    }
+  },
+  "$type": "com.atproto.lexicon.schema",
+  "lexicon": 1
+}

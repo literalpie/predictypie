@@ -1,25 +1,90 @@
+# PredictyPie
 
-# Plans
+Stack: Solid + Convex + AT Proto (no custom PDS)
 
-I'm not making issues in Github for these things because the app/project isn't formal enough to warrent that. Contributions are welcome though! If you are interested in doing any of this, feel free to open an issue to ask questions of discuss plans.
+## Next Steps
 
-## Stuff I definitely want to do
-* Make it not-ugly
-* More metadata about predictions (probably use TanStack table) starting with author and date prediction was made
-* Show "upvotes"/"downvotes" (based on people who respond with "I predict this is right/wrong")
+### 1. Author-Only Resolution ✅✅
 
-## Stuff I probably want to do
+Only show "Mark Correct/Incorrect" buttons to the prediction author.
 
-* Keep predictions in a db (supabase or similar) and do scraping periodically instead of on every page load
-* Show "related predictions" based on responses to the original prediction post that have their own predictions
-* Allow predictions to have a "deadline" by which the author thinks they will be proven right
+**Implementation:**
 
-## Scratchpad of thoughts
+- In `src/routes/index.tsx`, get current user DID from cookie
+- Only render resolve buttons when `pred.authorDid === currentUserDid`
+- Current user DID available via cookie regex
 
-Should it be possible to upvote/downvote preditions through the app, so you don't have to clutter your feed? I think no at first for simplicity, since this is supposed to be a social app. I also don't want to deal with signing in to the app.
+### 2. Filter by Status ✅
 
-Should this app have its own db to persist, instead of using REST to get all notifications every time the page loads? Yes, definitely if we get to any reasonable scale. I don't think there's a way to only get notifications that happened since a specific time, so maybe the data scraping should only happen on a certain interval, or with a manual refresh by admins (me). 
-Even if we did get new notifications, I would still want to re-scan the replies to old notifications (unless even replies need to have the "@")
+Add tabs or buttons to filter: All / Unresolved / Correct / Incorrect.
 
-Is there a way to attribute a prediction to someone? For example, a podcaster or CEO (*caugh* Elon) who makes a public promise about someone?
-I would want this to require a clear attribution of the original prediction, and don't want to be responsible for fact-checking and stuff
+**Implementation:**
+
+- Add query param or state for filter: `filter: "all" | "unresolved" | "correct" | "incorrect"`
+- Create new Convex query or filter in existing query
+- Add filter buttons to `src/routes/index.tsx`
+
+### 3. User Profile Page
+
+Show all predictions by a specific user at `/user/:identifier`.
+
+**Implementation:**
+
+- Create `src/routes/user/[identifier].tsx`
+- Query predictions by `authorDid` (resolve handle to DID if needed)
+- Show user's handle + all their predictions
+
+### 4. Deployment
+
+Deploy to production (Vercel/Netlify + Convex cloud).
+
+**Implementation:**
+
+- Push Convex: `npx convex deploy` (creates production deployment)
+- Add `CONVEX_DEPLOYMENT_URL` and `CONVEX_DEPLOYMENT_KEY` env vars
+- Deploy frontend to Vercel: `pnpm deploy` or manual connect
+- Move Tap to production server or configure production webhook URL
+
+### 5. Design System ✅ (light/dark, Tailwind)
+
+Add shared styles for light/dark mode and components.
+
+**Implementation:**
+
+- Add light/dark mode toggle (persist to localStorage)
+- Extract shared button styles as CSS classes
+- Use Tailwind CSS or CSS variables for theming
+- Apply theme to all components
+
+### 6. Make Deadline Optional
+
+Allow creating predictions without a deadline.
+
+**Implementation:**
+
+- Remove required deadline from form in `src/routes/new.tsx`
+- Update Convex schema: `deadline` already optional
+- No schema changes needed
+
+### 6. Voting on Predictions
+
+Allow users to vote on predictions: agree/disagree, and resolve-true/resolve-false.
+
+**Implementation:**
+
+- Add `votes` table to Convex schema (predictionId, voterDid, agree, resolvedAs)
+- Add vote mutation
+- Add get votes query for a prediction
+- Show vote buttons on each prediction card
+- Display vote counts
+
+### 7. Error Handling
+
+Better error messages for failed predictions, OAuth issues, etc.
+
+**Implementation:**
+
+- Add error state + display in `src/routes/new.tsx`
+- Add error display in OAuth flows (`callback.ts`, `login-api.ts`)
+- Show user-friendly messages instead of raw errors
+- Consider adding error logging to external service (optional)

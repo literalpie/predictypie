@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+html,
+body {
+  min-height: 100vh;
+}
+
+body {
+  @apply bg-white;
+}
+
+.dark body {
+  @apply bg-zinc-900;
+}
