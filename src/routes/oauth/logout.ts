@@ -10,6 +10,12 @@ const PUBLIC_URL =
   "http://127.0.0.1:3001";
 
 export async function POST({ nativeEvent }: APIEvent) {
+  console.log(
+    "url",
+    process.env.VITE_PUBLIC_URL,
+    import.meta.env.VITE_PUBLIC_URL,
+    PUBLIC_URL,
+  );
   try {
     const client = await getOAuthClient();
     // Get DID from cookie
