@@ -121,3 +121,24 @@ export const resolvePrediction = mutation({
     }
   },
 });
+
+export const deletePrediction = mutation({
+  args: {
+    rkey: v.string(),
+    authorDid: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const prediction = await ctx.db
+      .query("predictions")
+      .withIndex("by_rkey", (q) => q.eq("rkey", args.rkey))
+      .unique();
+
+    if (!prediction) return;
+
+    if (prediction.authorDid !== args.authorDid) {
+      throw new Error("Unauthorized: cannot delete another user's prediction");
+    }
+
+    await ctx.db.delete(prediction._id);
+  },
+});

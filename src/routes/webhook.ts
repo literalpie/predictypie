@@ -53,6 +53,11 @@ export async function POST({ request }: { request: Request }) {
       if (handle) {
         await convexHttpClient.mutation(api.predictions.upsertUser, { did: evt.did, handle });
       }
+    } else if (evt.action === "delete") {
+      await convexHttpClient.mutation(api.predictions.deletePrediction, {
+        rkey: evt.rkey,
+        authorDid: evt.did,
+      });
     }
   }
 

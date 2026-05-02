@@ -3,7 +3,7 @@ import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { action, redirect, useAction, useSearchParams, query } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
-import { resolvePrediction as resolvePredictionOnPds } from "~/server/createPrediction";
+import { resolvePrediction as resolvePredictionOnPds, deletePrediction as deletePredictionOnPds } from "~/server/createPrediction";
 import Button from "../components/Button";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -18,6 +18,16 @@ const resolveAction = action(async (formData: FormData) => {
   await resolvePredictionOnPds(did, atUri, resolvedAs);
   return redirect("/");
 }, "resolvePrediction");
+
+const deleteAction = action(async (formData: FormData) => {
+  "use server";
+  const did = getCookie("did");
+  if (!did) throw new Error("Not logged in");
+
+  const atUri = formData.get("atUri") as string;
+  await deletePredictionOnPds(did, atUri);
+  return redirect("/");
+}, "deletePrediction");
 
 const getSessionDid = query(async () => {
   "use server";
@@ -35,6 +45,7 @@ export default function Home() {
 
   const predictions = createQuery(api.predictions.getPredictions, () => ({ filter: filter() }));
   const resolvePrediction = useAction(resolveAction);
+  const deletePredictionAction = useAction(deleteAction);
   const [sessionDid] = createResource(loadSessionDid);
 
   const isAuthor = (authorDid: string) => sessionDid() === authorDid;
@@ -146,6 +157,21 @@ export default function Home() {
                         </div>
                       </Show>
                     )}
+
+                    <Show when={isAuthor(pred.authorDid)}>
+                      <button
+                        class="ml-2 text-zinc-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 text-sm"
+                        onClick={() => {
+                          if (confirm("Are you sure you want to delete this prediction?")) {
+                            const fd = new FormData();
+                            fd.set("atUri", pred.atUri);
+                            deletePredictionAction(fd);
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </Show>
                   </div>
                 </li>
               )}

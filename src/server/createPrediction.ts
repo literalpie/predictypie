@@ -1,6 +1,7 @@
 "use server";
 
 import { Client, l } from "@atproto/lex";
+import { AtUri } from "@atproto/syntax";
 import { Tap } from "@atproto/tap";
 import { getOAuthClient } from "~/auth/client";
 import { main as predictionMain } from "~/lexicons/app/predictypie/prediction";
@@ -58,4 +59,14 @@ export const resolvePrediction = async (
     },
     { rkey },
   );
+};
+
+export const deletePrediction = async (did: string, atUri: string) => {
+  const uri = new AtUri(atUri);
+
+  const client = await getOAuthClient();
+  const oauthSession = await client.restore(did);
+  const lexClient = new Client(oauthSession);
+
+  await lexClient.deleteRecord(uri.collectionSafe, uri.rkeySafe);
 };
