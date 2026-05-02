@@ -12,7 +12,7 @@ import { convexHttpClient } from "../lib/contextHttpClient";
 
 export const SCOPE = "atproto repo:app.predictypie.prediction";
 
-const PUBLIC_URL = process.env.VITE_PUBLIC_URL;
+const PUBLIC_URL = import.meta.env.VITE_PUBLIC_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 function getClientMetadata(): OAuthClientMetadataInput {
@@ -34,7 +34,7 @@ function getClientMetadata(): OAuthClientMetadataInput {
   }
   console.log(
     "no public url",
-    process.env.VITE_PUBLIC_URL,
+    import.meta.env.VITE_PUBLIC_URL,
     import.meta.env.VITE_PUBLIC_URL,
   );
   return buildAtprotoLoopbackClientMetadata({

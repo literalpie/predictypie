@@ -6,13 +6,13 @@ import { getOAuthClient } from "~/auth/client";
 
 const PUBLIC_URL =
   process.env.DEPLOY_PRIME_URL ||
-  process.env.VITE_PUBLIC_URL ||
+  import.meta.env.VITE_PUBLIC_URL ||
   "http://127.0.0.1:3001";
 
 export async function POST({ nativeEvent }: APIEvent) {
   console.log(
     "url",
-    process.env.VITE_PUBLIC_URL,
+    import.meta.env.VITE_PUBLIC_URL,
     import.meta.env.VITE_PUBLIC_URL,
     PUBLIC_URL,
   );

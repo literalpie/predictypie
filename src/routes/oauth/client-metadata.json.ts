@@ -1,5 +1,5 @@
 "use server";
-const BASE_URL = process.env.VITE_PUBLIC_URL || "https://predictypie.local";
+const BASE_URL = import.meta.env.VITE_PUBLIC_URL || "https://predictypie.local";
 
 export async function GET() {
   const tokenEndpointAuthMethod = process.env.PRIVATE_KEY
