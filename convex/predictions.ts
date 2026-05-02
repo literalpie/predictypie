@@ -77,7 +77,7 @@ export const createPrediction = mutation({
     if (existing) {
       await ctx.db.patch(existing._id, args);
     } else {
-      await ctx.db.insert("predictions", { ...args, resolvedAs: undefined });
+      await ctx.db.insert("predictions", args);
     }
   },
 });

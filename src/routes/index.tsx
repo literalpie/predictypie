@@ -1,7 +1,7 @@
-import { For, Show, createMemo } from "solid-js";
+import { For, Show, createResource } from "solid-js";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
-import { action, redirect, useAction, useSearchParams } from "@solidjs/router";
+import { action, redirect, useAction, useSearchParams, cache, query } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
 import { resolvePrediction as resolvePredictionOnPds } from "~/server/createPrediction";
 import Button from "../components/Button";
@@ -19,10 +19,13 @@ const resolveAction = action(async (formData: FormData) => {
   return redirect("/");
 }, "resolvePrediction");
 
-function getCurrentDid(): string | undefined {
-  if (typeof document === "undefined") return undefined;
-  const match = document.cookie.match(/(?:^|;)did=([^;]+)/);
-  return match ? match[1] : undefined;
+const getSessionDid = query(async () => {
+  "use server";
+  return getCookie("did") ?? null;
+}, "session-did");
+
+async function loadSessionDid() {
+  return getSessionDid();
 }
 
 export default function Home() {
@@ -31,9 +34,9 @@ export default function Home() {
   
   const predictions = createQuery(api.predictions.getPredictions, () => ({ filter: filter() }));
   const resolvePrediction = useAction(resolveAction);
-  const currentDid = createMemo(() => getCurrentDid());
-
-  const isAuthor = (authorDid: string) => currentDid() === authorDid;
+  const [sessionDid] = createResource(loadSessionDid);
+  
+  const isAuthor = (authorDid: string) => sessionDid() === authorDid;
 
   const setFilter = (f: string) => {
     setSearchParams({ filter: f });
