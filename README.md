@@ -1,6 +1,6 @@
 # PredictyPie
 
-An AT Protocol app for making and browsing predictions. Users store predictions in their own PDS (not a custom PDS), and they're mirrored to Convex via Tap webhook.
+An AT Protocol app for making and browsing predictions. Users store predictions in their own PDS, and they're mirrored to Convex via Tap webhook.
 
 ## Quick Start
 

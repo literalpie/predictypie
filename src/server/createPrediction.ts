@@ -12,6 +12,7 @@ const TAP_ADMIN_PASSWORD = process.env.TAP_ADMIN_PASSWORD || "admin";
 async function addRepoToTap(did: string) {
   try {
     const tap = new Tap(TAP_URL, { adminPassword: TAP_ADMIN_PASSWORD });
+    // TODO: This might not be necessary because we use --collection-filters?
     await tap.addRepos([did]);
   } catch (error) {
     console.warn("Failed to add repo to TAP:", error);
@@ -19,11 +20,7 @@ async function addRepoToTap(did: string) {
   }
 }
 
-export const createPrediction = async (
-  did: string,
-  text: string,
-  deadline?: string,
-) => {
+export const createPrediction = async (did: string, text: string, deadline?: string) => {
   const now = l.toDatetimeString(new Date());
   const client = await getOAuthClient();
   const oauthSession = await client.restore(did);

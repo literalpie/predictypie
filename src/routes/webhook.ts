@@ -1,9 +1,7 @@
-import { parseTapEvent, assureAdminAuth } from "@atproto/tap";
+import { parseTapEvent } from "@atproto/tap";
 import { AtUri } from "@atproto/syntax";
 import { api } from "../../convex/_generated/api";
 import { convexHttpClient } from "../lib/contextHttpClient";
-
-const TAP_ADMIN_PASSWORD = process.env.TAP_ADMIN_PASSWORD || "admin";
 
 async function resolveHandle(did: string): Promise<string | null> {
   try {
@@ -21,16 +19,6 @@ async function resolveHandle(did: string): Promise<string | null> {
 }
 
 export async function POST({ request }: { request: Request }) {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-  }
-  try {
-    assureAdminAuth(TAP_ADMIN_PASSWORD, authHeader);
-  } catch {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-  }
-
   const body = await request.json();
   const evt = parseTapEvent(body);
 
