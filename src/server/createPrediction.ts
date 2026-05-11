@@ -2,22 +2,25 @@
 
 import { Client, l } from "@atproto/lex";
 import { AtUri } from "@atproto/syntax";
-import { Tap } from "@atproto/tap";
 import { getOAuthClient } from "~/auth/client";
 import { main as predictionMain } from "~/lexicons/app/predictypie/prediction";
 
-const TAP_URL = process.env.TAP_URL || "http://localhost:2480";
-const TAP_ADMIN_PASSWORD = process.env.TAP_ADMIN_PASSWORD || "admin";
-
 async function addRepoToTap(did: string) {
-  try {
-    const tap = new Tap(TAP_URL, { adminPassword: TAP_ADMIN_PASSWORD });
-    // TODO: This might not be necessary because we use --collection-filters?
-    await tap.addRepos([did]);
-  } catch (error) {
-    console.warn("Failed to add repo to TAP:", error);
-    // Silent fail
+  const response = await fetch("https://community-tap.netlify.app/api/hooks/addRepo", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      // Later: 'Authorization': `Bearer ${API_KEY}`
+    },
+    body: JSON.stringify({
+      repoDid: did,
+    }),
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(`Failed to add repo: ${error.error}`);
   }
+  return await response.json();
 }
 
 export const createPrediction = async (did: string, text: string, deadline?: string) => {
