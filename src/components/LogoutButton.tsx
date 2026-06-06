@@ -1,21 +1,27 @@
-"use client";
+import { action, useAction } from "@solidjs/router";
+import { getCookie, deleteCookie } from "@solidjs/start/http";
+import { getOAuthClient } from "~/auth/client";
 
-import { revalidate } from "@solidjs/router";
-import { query } from "@solidjs/router";
-
-const sessionQuery = query(async () => {
+const logout = action(async () => {
   "use server";
-  return null;
-}, "session");
+  const client = await getOAuthClient();
+  const did = getCookie("did");
+  if (did) {
+    await client.revoke(did);
+  }
+  deleteCookie("did");
+}, "logout");
 
 export function LogoutButton() {
+  const logoutAction = useAction(logout);
+
   async function handleLogout() {
-    await fetch("/oauth/logout", { method: "POST" });
-    revalidate(sessionQuery.key);
+    await logoutAction();
+    window.location.href = "/";
   }
 
   return (
-    <button onClick={handleLogout} class="text-sm text-zinc-500 hover:text-zinc-700">
+    <button onClick={handleLogout} class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
       Sign out
     </button>
   );

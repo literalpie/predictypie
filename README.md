@@ -9,7 +9,7 @@ An AT Protocol app for making and browsing predictions. Users store predictions 
 pnpm install
 
 # Start Convex + dev server
-pnpm convex dev --start 'vite dev --port 3000'
+pnpm convex dev --start 'vite dev --port 3000 --host'
 ```
 
 Visit http://127.0.0.1:3000 and log in with your AT Protocol account.
