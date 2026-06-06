@@ -1,7 +1,8 @@
-import { createSignal } from "solid-js";
+import { createSignal, createResource, Show } from "solid-js";
 import { action, redirect, useAction } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
 import { createPrediction as createPredictionToPds } from "~/server/createPrediction";
+import { getSessionDid } from "~/lib/session";
 
 const createPredictionAction = action(async (formData: FormData) => {
   "use server";
@@ -25,6 +26,7 @@ const createPredictionAction = action(async (formData: FormData) => {
 
 export default function NewPrediction() {
   const createPrediction = useAction(createPredictionAction);
+  const [sessionDid] = createResource(() => getSessionDid());
   const [text, setText] = createSignal("");
   const [deadline, setDeadline] = createSignal("");
   const [loading, setLoading] = createSignal(false);
@@ -50,9 +52,14 @@ export default function NewPrediction() {
 
   return (
     <main class="max-w-2xl mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4">New Prediction</h1>
+      <Show when={sessionDid()} fallback={
+        <p>
+          You must <a href="/oauth/login" class="text-blue-600 dark:text-blue-400 hover:underline">sign in</a> to create a prediction.
+        </p>
+      }>
+        <h1 class="text-2xl font-bold mb-4">New Prediction</h1>
 
-      <form onSubmit={handleSubmit} class="space-y-4">
+        <form onSubmit={handleSubmit} class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-zinc-700 mb-1">What do you predict?</label>
           <textarea
@@ -87,6 +94,7 @@ export default function NewPrediction() {
           {loading() ? "Creating..." : "Create Prediction"}
         </button>
       </form>
+      </Show>
     </main>
   );
 }

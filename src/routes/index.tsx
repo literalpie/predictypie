@@ -1,13 +1,15 @@
 import { For, Show, createResource } from "solid-js";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
-import { action, redirect, useAction, useSearchParams, query } from "@solidjs/router";
+import { action, redirect, useAction, useSearchParams } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
 import {
   resolvePrediction as resolvePredictionOnPds,
   deletePrediction as deletePredictionOnPds,
 } from "~/server/createPrediction";
+import { getSessionDid } from "../lib/session";
 import Button from "../components/Button";
+import { LogoutButton } from "../components/LogoutButton";
 import ThemeToggle from "../components/ThemeToggle";
 
 const resolveAction = action(async (formData: FormData) => {
@@ -32,15 +34,6 @@ const deleteAction = action(async (formData: FormData) => {
   return redirect("/");
 }, "deletePrediction");
 
-const getSessionDid = query(async () => {
-  "use server";
-  return getCookie("did") ?? null;
-}, "session-did");
-
-async function loadSessionDid() {
-  return getSessionDid();
-}
-
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = () =>
@@ -49,7 +42,7 @@ export default function Home() {
   const predictions = createQuery(api.predictions.getPredictions, () => ({ filter: filter() }));
   const resolvePrediction = useAction(resolveAction);
   const deletePredictionAction = useAction(deleteAction);
-  const [sessionDid] = createResource(loadSessionDid);
+  const [sessionDid] = createResource(() => getSessionDid());
 
   const isAuthor = (authorDid: string) => sessionDid() === authorDid;
 
@@ -63,12 +56,17 @@ export default function Home() {
         <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">PredictyPie</h1>
         <nav class="flex gap-4 items-center">
           <ThemeToggle />
-          <a href="/oauth/login" class="text-blue-600 dark:text-blue-400 hover:underline">
-            Sign in
-          </a>
-          <a href="/new" class="text-blue-600 dark:text-blue-400 hover:underline">
-            New Prediction
-          </a>
+          <Show when={sessionDid()}>
+            <a href="/new" class="text-blue-600 dark:text-blue-400 hover:underline">
+              New Prediction
+            </a>
+            <LogoutButton />
+          </Show>
+          <Show when={sessionDid() === null}>
+            <a href="/oauth/login" class="text-blue-600 dark:text-blue-400 hover:underline">
+              Sign in
+            </a>
+          </Show>
         </nav>
       </header>
       <div class="flex gap-2 mb-4">
