@@ -23,7 +23,14 @@ async function addRepoToTap(did: string) {
   return await response.json();
 }
 
-export const createPrediction = async (did: string, text: string, deadline?: string) => {
+export const createPrediction = async (
+  did: string,
+  text: string,
+  deadline?: string,
+  madeAt?: string,
+  attribution?: string,
+  source?: string,
+) => {
   const now = l.toDatetimeString(new Date());
   const client = await getOAuthClient();
   const oauthSession = await client.restore(did);
@@ -33,6 +40,9 @@ export const createPrediction = async (did: string, text: string, deadline?: str
     text,
     deadline: deadline ? l.toDatetimeString(new Date(deadline)) : now,
     createdAt: now,
+    madeAt: madeAt || undefined,
+    attribution: attribution || undefined,
+    source: source || undefined,
   });
 
   await addRepoToTap(did);
@@ -61,6 +71,9 @@ export const resolvePrediction = async (
       deadline: existing.value.deadline,
       createdAt: existing.value.createdAt,
       resolvedAs,
+      madeAt: existing.value.madeAt,
+      attribution: existing.value.attribution,
+      source: existing.value.source,
     },
     { rkey },
   );

@@ -110,10 +110,21 @@ export default function Home() {
               {(pred) => (
                 <li class="border rounded p-3 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
                   <p class="text-lg text-zinc-900 dark:text-zinc-100">{pred.text}</p>
-                  <div class="text-sm mt-2 flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
-                    <span>@{pred.author?.handle ?? pred.authorDid}</span>
+                  <div class="text-sm mt-2 flex items-center gap-2 text-zinc-500 dark:text-zinc-400 flex-wrap">
+                    <span>{pred.attribution ?? `@${pred.author?.handle ?? pred.authorDid}`}</span>
+                    {pred.madeAt && <span> · {new Date(pred.madeAt).toLocaleDateString()}</span>}
                     {pred.deadline && (
                       <span> · Deadline: {new Date(pred.deadline).toLocaleDateString()}</span>
+                    )}
+                    {pred.source && (
+                      <a
+                        href={pred.source}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="text-blue-500 hover:underline"
+                      >
+                        · Source
+                      </a>
                     )}
                     {pred.resolvedAs ? (
                       <span

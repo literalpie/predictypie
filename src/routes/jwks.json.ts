@@ -12,9 +12,12 @@ export async function GET() {
   }
 
   const key = await JoseKey.fromJWK(JSON.parse(PRIVATE_KEY));
-  return new Response(JSON.stringify({
-    keys: [key.publicJwk],
-  }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return new Response(
+    JSON.stringify({
+      keys: [key.publicJwk],
+    }),
+    {
+      headers: { "Content-Type": "application/json" },
+    },
+  );
 }
