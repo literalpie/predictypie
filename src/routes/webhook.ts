@@ -36,6 +36,9 @@ export async function POST({ request }: { request: Request }) {
         deadline: record.deadline,
         createdAt: record.createdAt,
         resolvedAs: record.resolvedAs,
+        madeAt: record.madeAt,
+        attribution: record.attribution,
+        source: record.source,
       });
 
       if (handle) {

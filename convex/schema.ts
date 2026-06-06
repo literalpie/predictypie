@@ -15,6 +15,9 @@ export default defineSchema({
     deadline: v.optional(v.string()),
     createdAt: v.string(),
     resolvedAs: v.optional(v.union(v.literal("correct"), v.literal("incorrect"))),
+    madeAt: v.optional(v.string()),
+    attribution: v.optional(v.string()),
+    source: v.optional(v.string()),
   })
     .index("by_rkey", ["rkey"])
     .index("by_author_recent", ["authorDid", "createdAt"])

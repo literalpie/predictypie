@@ -14,6 +14,9 @@ type Main = {
   createdAt: l.DatetimeString
   deadline: l.DatetimeString
   resolvedAs?: 'correct' | 'incorrect'
+  madeAt?: string
+  attribution?: string
+  source?: string
 }
 
 export type { Main }
@@ -26,6 +29,9 @@ const main = l.record<'tid', Main>(
     createdAt: l.string({ format: 'datetime' }),
     deadline: l.string({ format: 'datetime' }),
     resolvedAs: l.optional(l.enum(['correct', 'incorrect'])),
+    madeAt: l.optional(l.string()),
+    attribution: l.optional(l.string()),
+    source: l.optional(l.string()),
   }),
 )
 

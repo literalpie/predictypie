@@ -48,6 +48,16 @@ export const setState = mutation({
   },
 });
 
+export const getUser = query({
+  args: { did: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_did", (q) => q.eq("did", args.did))
+      .unique();
+  },
+});
+
 export const getState = query({
   args: { key: v.string() },
   handler: async (ctx, args) => {

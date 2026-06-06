@@ -24,6 +24,13 @@ Tap mirrors predictions from users' PDSes to Convex.
 $(go env GOPATH)/bin/tap run --webhook-url=http://localhost:3000/webhook --collection-filters=app.predictypie.prediction --admin-password=admin
 ```
 
+For less traffic, it's helpful to run tap without `--collection-filters` and do 
+```bash
+curl -X POST http://localhost:2480/repos/add \
+  -H "Content-Type: application/json" \
+  -d '{"dids": ["did:plc:r3bpptdqfsipcnildivvdv5d"]}'
+```
+
 The webhook endpoint is at `/webhook`.
 
 ## Environment Variables
