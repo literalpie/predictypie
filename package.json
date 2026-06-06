@@ -19,6 +19,7 @@
     "@atproto/oauth-client-node": "^0.3.17",
     "@atproto/syntax": "^0.5.4",
     "@atproto/tap": "^0.2.13",
+    "@msviderok/base-ui-solid": "1.0.0-beta.11",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.16.1",
     "@solidjs/start": "2.0.0-alpha.2",

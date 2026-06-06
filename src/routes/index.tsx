@@ -1,4 +1,14 @@
 import { For, Show, createResource } from "solid-js";
+import {
+  CollapsibleRoot,
+  CollapsibleTrigger,
+  CollapsiblePanel,
+  TooltipRoot,
+  TooltipTrigger,
+  TooltipPortal,
+  TooltipPositioner,
+  TooltipPopup,
+} from "../components/ClientCollapsible";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { action, redirect, useAction, useSearchParams } from "@solidjs/router";
@@ -108,81 +118,140 @@ export default function Home() {
           <ul class="space-y-3">
             <For each={predictions()}>
               {(pred) => (
-                <li class="border rounded p-3 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
-                  <p class="text-lg text-zinc-900 dark:text-zinc-100">{pred.text}</p>
-                  <div class="text-sm mt-2 flex items-center gap-2 text-zinc-500 dark:text-zinc-400 flex-wrap">
-                    <span>{pred.attribution ?? `@${pred.author?.handle ?? pred.authorDid}`}</span>
-                    {pred.madeAt && <span> · {new Date(pred.madeAt).toLocaleDateString()}</span>}
-                    {pred.deadline && (
-                      <span> · Deadline: {new Date(pred.deadline).toLocaleDateString()}</span>
-                    )}
-                    {pred.source && (
-                      <a
-                        href={pred.source}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-blue-500 hover:underline"
-                      >
-                        · Source
-                      </a>
-                    )}
-                    {pred.resolvedAs ? (
-                      <span
-                        class={
-                          pred.resolvedAs === "correct"
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-red-600 dark:text-red-400"
-                        }
-                      >
-                        [{pred.resolvedAs === "correct" ? "✓ Correct" : "✗ Incorrect"}]
-                      </span>
-                    ) : (
-                      <Show
-                        when={isAuthor(pred.authorDid)}
-                        fallback={<span class="text-xs text-zinc-400">Pending resolution</span>}
-                      >
-                        <div class="ml-auto flex gap-2">
-                          <Button
-                            variant="success"
+                <li class="border rounded bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
+                  <CollapsibleRoot>
+                    <CollapsibleTrigger class="flex items-start justify-between p-3 w-full text-left bg-transparent border-none cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset">
+                      <div class="min-w-0 flex-1">
+                        <p class="text-lg text-zinc-900 dark:text-zinc-100 truncate pr-3">
+                          {pred.text}
+                        </p>
+                        <div class="text-sm text-zinc-500 dark:text-zinc-400 flex items-center justify-between w-full">
+                          <Show
+                            when={
+                              pred.attribution &&
+                              pred.attribution !== `@${pred.author?.handle ?? pred.authorDid}`
+                            }
+                            fallback={
+                              pred.attribution ?? `@${pred.author?.handle ?? pred.authorDid}`
+                            }
+                          >
+                            <TooltipRoot>
+                              <TooltipTrigger
+                                render="span"
+                                class="underline decoration-dotted underline-offset-2"
+                              >
+                                {pred.attribution}
+                              </TooltipTrigger>
+                              <TooltipPortal>
+                                <TooltipPositioner sideOffset={4}>
+                                  <TooltipPopup class="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 text-xs rounded px-2 py-1 shadow-lg">
+                                    @{pred.author?.handle ?? pred.authorDid}
+                                  </TooltipPopup>
+                                </TooltipPositioner>
+                              </TooltipPortal>
+                            </TooltipRoot>
+                          </Show>
+                          {pred.source && (
+                            <a
+                              href={pred.source}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="text-blue-500 hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Source
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      {pred.resolvedAs === "correct" && (
+                        <span class="text-green-600 dark:text-green-400 text-xl shrink-0 mt-0.5">
+                          ✓
+                        </span>
+                      )}
+                      {pred.resolvedAs === "incorrect" && (
+                        <span class="text-red-600 dark:text-red-400 text-xl shrink-0 mt-0.5">
+                          ✗
+                        </span>
+                      )}
+                    </CollapsibleTrigger>
+                    <CollapsiblePanel class="border-t border-zinc-200 dark:border-zinc-700 p-3 text-sm text-zinc-500 dark:text-zinc-400">
+                      <div class="flex justify-between gap-x-6 w-full">
+                        <Show when={pred.madeAt}>
+                          <Show
+                            when={
+                              pred.createdAt &&
+                              new Date(pred.createdAt).toDateString() !==
+                                new Date(pred.madeAt!).toDateString()
+                            }
+                            fallback={<span>{new Date(pred.madeAt!).toLocaleDateString()}</span>}
+                          >
+                            <TooltipRoot>
+                              <TooltipTrigger
+                                render="span"
+                                class="underline decoration-dotted underline-offset-2"
+                              >
+                                {new Date(pred.madeAt!).toLocaleDateString()}
+                              </TooltipTrigger>
+                              <TooltipPortal>
+                                <TooltipPositioner sideOffset={4}>
+                                  <TooltipPopup class="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 text-xs rounded px-2 py-1 shadow-lg">
+                                    Submitted: {new Date(pred.createdAt!).toLocaleDateString()}
+                                  </TooltipPopup>
+                                </TooltipPositioner>
+                              </TooltipPortal>
+                            </TooltipRoot>
+                          </Show>
+                        </Show>
+                        {pred.deadline && (
+                          <span>Deadline: {new Date(pred.deadline).toLocaleDateString()}</span>
+                        )}
+                      </div>
+                      <Show when={!pred.resolvedAs && !isAuthor(pred.authorDid)}>
+                        <p class="text-xs text-zinc-400 mt-2">Pending resolution</p>
+                      </Show>
+                      <Show when={isAuthor(pred.authorDid)}>
+                        <div class="flex gap-2 pt-2 items-center -ml-3">
+                          <Show when={!pred.resolvedAs}>
+                            <Button
+                              variant="success"
+                              onClick={() => {
+                                const fd = new FormData();
+                                fd.set("atUri", pred.atUri);
+                                fd.set("resolvedAs", "correct");
+                                resolvePrediction(fd);
+                              }}
+                            >
+                              Mark Correct
+                            </Button>
+                            <Button
+                              variant="error"
+                              onClick={() => {
+                                const fd = new FormData();
+                                fd.set("atUri", pred.atUri);
+                                fd.set("resolvedAs", "incorrect");
+                                resolvePrediction(fd);
+                              }}
+                            >
+                              Mark Incorrect
+                            </Button>
+                          </Show>
+                          <button
+                            class="text-zinc-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 text-sm ml-auto"
                             onClick={() => {
-                              const fd = new FormData();
-                              fd.set("atUri", pred.atUri);
-                              fd.set("resolvedAs", "correct");
-                              resolvePrediction(fd);
+                              if (confirm("Are you sure you want to delete this prediction?")) {
+                                const fd = new FormData();
+                                fd.set("atUri", pred.atUri);
+                                deletePredictionAction(fd);
+                              }
                             }}
                           >
-                            Mark Correct
-                          </Button>
-                          <Button
-                            variant="error"
-                            onClick={() => {
-                              const fd = new FormData();
-                              fd.set("atUri", pred.atUri);
-                              fd.set("resolvedAs", "incorrect");
-                              resolvePrediction(fd);
-                            }}
-                          >
-                            Mark Incorrect
-                          </Button>
+                            Delete
+                          </button>
                         </div>
                       </Show>
-                    )}
-
-                    <Show when={isAuthor(pred.authorDid)}>
-                      <button
-                        class="ml-2 text-zinc-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 text-sm"
-                        onClick={() => {
-                          if (confirm("Are you sure you want to delete this prediction?")) {
-                            const fd = new FormData();
-                            fd.set("atUri", pred.atUri);
-                            deletePredictionAction(fd);
-                          }
-                        }}
-                      >
-                        Delete
-                      </button>
-                    </Show>
-                  </div>
+                    </CollapsiblePanel>
+                  </CollapsibleRoot>
                 </li>
               )}
             </For>
