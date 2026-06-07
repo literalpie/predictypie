@@ -5,10 +5,11 @@ type ButtonProps = {
   variant?: "primary" | "secondary" | "link" | "success" | "error" | "danger";
   size?: "sm";
   href?: string;
+  inLayer?: boolean;
 } & JSX.ButtonHTMLAttributes<HTMLButtonElement> & JSX.AnchorHTMLAttributes<HTMLAnchorElement>;
 
 const Button: Component<ButtonProps> = (props) => {
-  const [local, rest] = splitProps(props, ["variant", "size", "class", "children", "href"]);
+  const [local, rest] = splitProps(props, ["variant", "size", "class", "children", "href", "inLayer"]);
 
   const base = "font-medium transition-colors disabled:opacity-50 cursor-pointer";
 
@@ -30,7 +31,10 @@ const Button: Component<ButtonProps> = (props) => {
   const className = createMemo(() => {
     const variant = local.variant ?? "primary";
     const size = local.size ?? "default";
-    const variantClasses = variants[variant];
+    let variantClasses = variants[variant];
+    if (variant === "secondary" && local.inLayer) {
+      variantClasses = variantClasses.replace("dark:hover:bg-zinc-800", "dark:hover:bg-zinc-700");
+    }
     return cn(base, sizes[size], variantClasses, local.class);
   });
 

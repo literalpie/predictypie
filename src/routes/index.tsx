@@ -125,9 +125,9 @@ export default function Home() {
             <LogoutButton />
           </Show>
           <Show when={sessionDid() === null}>
-            <a href="/oauth/login" class="text-blue-600 dark:text-blue-400 hover:underline">
+            <Button variant="secondary" href="/oauth/login">
               Sign in
-            </a>
+            </Button>
           </Show>
         </nav>
       </header>
@@ -238,7 +238,8 @@ export default function Home() {
                           <Show when={!pred.resolvedAs}>
                             <Button
                               variant="secondary"
-                              class="text-green-700 dark:text-green-300 dark:hover:bg-zinc-700"
+                              inLayer
+                              class="text-green-700 dark:text-green-300"
                               onClick={() => {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
@@ -251,7 +252,8 @@ export default function Home() {
                             </Button>
                             <Button
                               variant="secondary"
-                              class="text-red-700 dark:text-red-300 dark:hover:bg-zinc-700"
+                              inLayer
+                              class="text-red-700 dark:text-red-300"
                               onClick={() => {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);

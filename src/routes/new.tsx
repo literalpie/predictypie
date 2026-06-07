@@ -90,9 +90,7 @@ export default function NewPrediction() {
         fallback={
           <p>
             You must{" "}
-            <a href="/oauth/login" class="text-blue-600 dark:text-blue-400 hover:underline">
-              sign in
-            </a>{" "}
+            <Button variant="link" href="/oauth/login">sign in</Button>{" "}
             to create a prediction.
           </p>
         }

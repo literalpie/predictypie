@@ -177,7 +177,7 @@ export function FilterBar() {
                     variant="secondary"
                     size="sm"
                     onClick={() => setPopoverOpen(false)}
-                    class="dark:hover:bg-zinc-700"
+                    inLayer
                   >
                     Cancel
                   </Button>
