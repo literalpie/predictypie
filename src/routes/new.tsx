@@ -5,6 +5,7 @@ import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { createPrediction as createPredictionToPds } from "~/server/createPrediction";
 import { getSessionDid } from "~/lib/session";
+import Button from "../components/Button";
 
 const createPredictionAction = action(async (formData: FormData) => {
   "use server";
@@ -174,13 +175,13 @@ export default function NewPrediction() {
 
           {error() && <p class="text-red-500 text-sm">{error()}</p>}
 
-          <button
+          <Button
             type="submit"
             disabled={loading() || !text()}
-            class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            class="w-full"
           >
             {loading() ? "Creating..." : "Create Prediction"}
-          </button>
+          </Button>
         </form>
       </Show>
     </main>

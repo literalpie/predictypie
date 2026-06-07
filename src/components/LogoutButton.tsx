@@ -1,6 +1,7 @@
 import { action, useAction } from "@solidjs/router";
 import { getCookie, deleteCookie } from "@solidjs/start/http";
 import { getOAuthClient } from "~/auth/client";
+import Button from "./Button";
 
 const logout = action(async () => {
   "use server";
@@ -21,11 +22,8 @@ export function LogoutButton() {
   }
 
   return (
-    <button
-      onClick={handleLogout}
-      class="text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-    >
+    <Button variant="link" onClick={handleLogout}>
       Sign out
-    </button>
+    </Button>
   );
 }
