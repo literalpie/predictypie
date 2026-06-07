@@ -28,7 +28,8 @@ const resolveAction = action(async (formData: FormData) => {
   const resolvedAs = formData.get("resolvedAs") as "correct" | "incorrect";
 
   await resolvePredictionOnPds(did, atUri, resolvedAs);
-  return redirect("/");
+  const search = formData.get("search") as string || "";
+  return redirect("/" + search);
 }, "resolvePrediction");
 
 const deleteAction = action(async (formData: FormData) => {
@@ -38,7 +39,8 @@ const deleteAction = action(async (formData: FormData) => {
 
   const atUri = formData.get("atUri") as string;
   await deletePredictionOnPds(did, atUri);
-  return redirect("/");
+  const search = formData.get("search") as string || "";
+  return redirect("/" + search);
 }, "deletePrediction");
 
 export default function Home() {
@@ -238,6 +240,7 @@ export default function Home() {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
                                 fd.set("resolvedAs", "correct");
+                                fd.set("search", window.location.search);
                                 resolvePrediction(fd);
                               }}
                             >
@@ -249,6 +252,7 @@ export default function Home() {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
                                 fd.set("resolvedAs", "incorrect");
+                                fd.set("search", window.location.search);
                                 resolvePrediction(fd);
                               }}
                             >
@@ -262,6 +266,7 @@ export default function Home() {
                               if (confirm("Are you sure you want to delete this prediction?")) {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
+                                fd.set("search", window.location.search);
                                 deletePredictionAction(fd);
                               }
                             }}
