@@ -1,4 +1,5 @@
 import { createSignal } from "solid-js";
+import Button from "../../components/Button";
 
 export default function LoginPage() {
   const [handle, setHandle] = createSignal("");
@@ -47,13 +48,9 @@ export default function LoginPage() {
         </div>
         {error() && <p class="text-red-500 text-sm">{error()}</p>}
 
-        <button
-          type="submit"
-          disabled={loading() || !handle()}
-          class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-        >
+        <Button type="submit" disabled={loading() || !handle()} class="w-full">
           {loading() ? "Signing in..." : "Sign in"}
-        </button>
+        </Button>
       </form>
     </main>
   );

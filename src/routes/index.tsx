@@ -1,14 +1,11 @@
-import { For, Show, createResource } from "solid-js";
+import { For, Show, createResource, createMemo } from "solid-js";
 import {
   CollapsibleRoot,
   CollapsibleTrigger,
   CollapsiblePanel,
-  TooltipRoot,
-  TooltipTrigger,
-  TooltipPortal,
-  TooltipPositioner,
-  TooltipPopup,
 } from "../components/ClientCollapsible";
+import { Tooltip } from "../components/Tooltip";
+import { FilterBar } from "../components/FilterBar";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { action, redirect, useAction, useSearchParams } from "@solidjs/router";
@@ -31,7 +28,8 @@ const resolveAction = action(async (formData: FormData) => {
   const resolvedAs = formData.get("resolvedAs") as "correct" | "incorrect";
 
   await resolvePredictionOnPds(did, atUri, resolvedAs);
-  return redirect("/");
+  const search = formData.get("search") as string || "";
+  return redirect("/" + search);
 }, "resolvePrediction");
 
 const deleteAction = action(async (formData: FormData) => {
@@ -41,23 +39,75 @@ const deleteAction = action(async (formData: FormData) => {
 
   const atUri = formData.get("atUri") as string;
   await deletePredictionOnPds(did, atUri);
-  return redirect("/");
+  const search = formData.get("search") as string || "";
+  return redirect("/" + search);
 }, "deletePrediction");
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const filter = () =>
     (searchParams.filter as "all" | "unresolved" | "correct" | "incorrect") ?? "all";
+  const fResolved = () =>
+    (searchParams.f_resolved as "all" | "unresolved" | "correct" | "incorrect" | undefined) ??
+    "all";
+  const fMadeBy = () => (searchParams.f_madeBy as string | undefined) ?? "";
+  const fDateMade = () => (searchParams.f_dateMade as string | undefined) ?? "";
+  const fDateMadeMod = () => (searchParams.f_dateMadeMod as string | undefined) ?? "on";
+  const fDeadline = () => (searchParams.f_deadline as string | undefined) ?? "";
+  const fDeadlineMod = () => (searchParams.f_deadlineMod as string | undefined) ?? "on";
 
-  const predictions = createQuery(api.predictions.getPredictions, () => ({ filter: filter() }));
+  const resolvedFilter = createMemo(() => {
+    const r = fResolved();
+    if (r === "all") return filter();
+    return r;
+  });
+
+  const predictions = createQuery(api.predictions.getPredictions, () => ({
+    filter: resolvedFilter(),
+  }));
   const resolvePrediction = useAction(resolveAction);
   const deletePredictionAction = useAction(deleteAction);
   const [sessionDid] = createResource(() => getSessionDid());
 
   const isAuthor = (authorDid: string) => sessionDid() === authorDid;
 
-  const setFilter = (f: string) => {
-    setSearchParams({ filter: f });
+  function fmtDate(dateStr: string): string {
+    const [y, m, d] = dateStr.split("T")[0].split("-").map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString();
+  }
+
+  function compareDate(dateStr: string | undefined, filterDate: string, mod: string): boolean {
+    if (!dateStr) return false;
+    const d = dateStr.split("T")[0];
+    if (mod === "on") return d === filterDate;
+    if (mod === "before") return d < filterDate;
+    if (mod === "after") return d > filterDate;
+    return d === filterDate;
+  }
+
+  const filteredPredictions = createMemo(() => {
+    const preds = predictions();
+    if (!preds) return [];
+    const mb = fMadeBy().replace(/^@/, "").toLowerCase();
+    const dm = fDateMade();
+    const dmMod = fDateMadeMod();
+    const dl = fDeadline();
+    const dlMod = fDeadlineMod();
+    return preds.filter((p) => {
+      if (
+        mb &&
+        !(p.attribution?.toLowerCase().includes(mb) || p.author?.handle?.toLowerCase().includes(mb))
+      ) {
+        return false;
+      }
+      if (dm && !compareDate(p.madeAt ?? p.createdAt, dm, dmMod)) return false;
+      if (dl && !compareDate(p.deadline, dl, dlMod)) return false;
+      return true;
+    });
+  });
+
+  const setMadeByFilter = (v: string) => {
+    setSearchParams({ f_madeBy: v || undefined });
   };
 
   return (
@@ -79,52 +129,33 @@ export default function Home() {
           </Show>
         </nav>
       </header>
-      <div class="flex gap-2 mb-4">
-        <Button variant="secondary" active={filter() === "all"} onClick={() => setFilter("all")}>
-          All
-        </Button>
-        <Button
-          variant="secondary"
-          active={filter() === "unresolved"}
-          onClick={() => setFilter("unresolved")}
-        >
-          Unresolved
-        </Button>
-        <Button
-          variant="secondary"
-          active={filter() === "correct"}
-          onClick={() => setFilter("correct")}
-        >
-          Correct
-        </Button>
-        <Button
-          variant="secondary"
-          active={filter() === "incorrect"}
-          onClick={() => setFilter("incorrect")}
-        >
-          Incorrect
-        </Button>
-      </div>
+      <FilterBar />
       <Show
         when={predictions()}
-        fallback={<p class="text-zinc-500 dark:text-zinc-400">Loading predictions...</p>}
+        fallback={
+          <ul class="space-y-3">
+            <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18" />
+            <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18" />
+            <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18" />
+            <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18 opacity-50" />
+            <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18 opacity-20" />
+          </ul>
+        }
       >
         <Show
-          when={(predictions() ?? []).length}
+          when={filteredPredictions().length}
           fallback={
-            <p class="text-zinc-500 dark:text-zinc-400">No predictions yet. Be the first!</p>
+            <p class="text-zinc-500 dark:text-zinc-400">No predictions match your filters.</p>
           }
         >
           <ul class="space-y-3">
-            <For each={predictions()}>
+            <For each={filteredPredictions()}>
               {(pred) => (
                 <li class="border rounded bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
                   <CollapsibleRoot>
                     <CollapsibleTrigger class="flex items-start justify-between p-3 w-full text-left bg-transparent border-none cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset">
                       <div class="min-w-0 flex-1">
-                        <p class="text-lg text-zinc-900 dark:text-zinc-100 truncate pr-3">
-                          {pred.text}
-                        </p>
+                        <p class="text-lg text-zinc-900 dark:text-zinc-100 pr-3">{pred.text}</p>
                         <div class="text-sm text-zinc-500 dark:text-zinc-400 flex items-center justify-between w-full">
                           <Show
                             when={
@@ -132,24 +163,28 @@ export default function Home() {
                               pred.attribution !== `@${pred.author?.handle ?? pred.authorDid}`
                             }
                             fallback={
-                              pred.attribution ?? `@${pred.author?.handle ?? pred.authorDid}`
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setMadeByFilter(
+                                    pred.attribution ?? pred.author?.handle ?? pred.authorDid,
+                                  );
+                                }}
+                                class="hover:text-blue-700 dark:hover:text-blue-400"
+                              >
+                                {pred.attribution ?? `@${pred.author?.handle ?? pred.authorDid}`}
+                              </button>
                             }
                           >
-                            <TooltipRoot>
-                              <TooltipTrigger
-                                render="span"
-                                class="underline decoration-dotted underline-offset-2"
-                              >
-                                {pred.attribution}
-                              </TooltipTrigger>
-                              <TooltipPortal>
-                                <TooltipPositioner sideOffset={4}>
-                                  <TooltipPopup class="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 text-xs rounded px-2 py-1 shadow-lg">
-                                    @{pred.author?.handle ?? pred.authorDid}
-                                  </TooltipPopup>
-                                </TooltipPositioner>
-                              </TooltipPortal>
-                            </TooltipRoot>
+                            <Tooltip
+                              text={pred.attribution!}
+                              tooltip={`@${pred.author?.handle ?? pred.authorDid}`}
+                              class="underline decoration-dotted underline-offset-2 cursor-default hover:text-blue-700 dark:hover:text-blue-400"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setMadeByFilter(pred.attribution!.replace(/^@/, ""));
+                              }}
+                            />
                           </Show>
                           {pred.source && (
                             <a
@@ -177,35 +212,21 @@ export default function Home() {
                     </CollapsibleTrigger>
                     <CollapsiblePanel class="border-t border-zinc-200 dark:border-zinc-700 p-3 text-sm text-zinc-500 dark:text-zinc-400">
                       <div class="flex justify-between gap-x-6 w-full">
-                        <Show when={pred.madeAt}>
+                        <Show when={pred.madeAt} fallback={<span>{fmtDate(pred.createdAt)}</span>}>
                           <Show
                             when={
                               pred.createdAt &&
-                              new Date(pred.createdAt).toDateString() !==
-                                new Date(pred.madeAt!).toDateString()
+                              pred.madeAt!.split("T")[0] !== pred.createdAt.split("T")[0]
                             }
-                            fallback={<span>{new Date(pred.madeAt!).toLocaleDateString()}</span>}
+                            fallback={<span>{fmtDate(pred.madeAt!)}</span>}
                           >
-                            <TooltipRoot>
-                              <TooltipTrigger
-                                render="span"
-                                class="underline decoration-dotted underline-offset-2"
-                              >
-                                {new Date(pred.madeAt!).toLocaleDateString()}
-                              </TooltipTrigger>
-                              <TooltipPortal>
-                                <TooltipPositioner sideOffset={4}>
-                                  <TooltipPopup class="bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 text-xs rounded px-2 py-1 shadow-lg">
-                                    Submitted: {new Date(pred.createdAt!).toLocaleDateString()}
-                                  </TooltipPopup>
-                                </TooltipPositioner>
-                              </TooltipPortal>
-                            </TooltipRoot>
+                            <Tooltip
+                              text={fmtDate(pred.madeAt!)}
+                              tooltip={`Submitted: ${fmtDate(pred.createdAt!)}`}
+                            />
                           </Show>
                         </Show>
-                        {pred.deadline && (
-                          <span>Deadline: {new Date(pred.deadline).toLocaleDateString()}</span>
-                        )}
+                        {pred.deadline && <span>Deadline: {fmtDate(pred.deadline)}</span>}
                       </div>
                       <Show when={!pred.resolvedAs && !isAuthor(pred.authorDid)}>
                         <p class="text-xs text-zinc-400 mt-2">Pending resolution</p>
@@ -219,6 +240,7 @@ export default function Home() {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
                                 fd.set("resolvedAs", "correct");
+                                fd.set("search", window.location.search);
                                 resolvePrediction(fd);
                               }}
                             >
@@ -230,24 +252,27 @@ export default function Home() {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
                                 fd.set("resolvedAs", "incorrect");
+                                fd.set("search", window.location.search);
                                 resolvePrediction(fd);
                               }}
                             >
                               Mark Incorrect
                             </Button>
                           </Show>
-                          <button
-                            class="text-zinc-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400 text-sm ml-auto"
+                          <Button
+                            variant="danger"
+                            class="ml-auto"
                             onClick={() => {
                               if (confirm("Are you sure you want to delete this prediction?")) {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
+                                fd.set("search", window.location.search);
                                 deletePredictionAction(fd);
                               }
                             }}
                           >
                             Delete
-                          </button>
+                          </Button>
                         </div>
                       </Show>
                     </CollapsiblePanel>
