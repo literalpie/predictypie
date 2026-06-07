@@ -8,6 +8,9 @@ import {
   PopoverPopup,
 } from "./ClientCollapsible";
 import Button from "./Button";
+import { FormField } from "./FormField";
+import { Input } from "./Input";
+import { Select } from "./Select";
 
 export function FilterBar() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -72,7 +75,10 @@ export function FilterBar() {
           if (open) resetDrafts();
         }}
       >
-        <PopoverTrigger class="px-3 py-1 rounded font-medium transition-colors bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm flex items-center gap-1.5">
+        <PopoverTrigger
+          render={(props) => <Button {...props} variant="secondary" />}
+          class="flex items-center gap-1.5"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -96,79 +102,83 @@ export function FilterBar() {
           <PopoverPositioner sideOffset={4}>
             <PopoverPopup class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-700 p-4 w-72 text-sm text-zinc-900 dark:text-zinc-100">
               <div class="space-y-3">
-                <div>
-                  <label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Resolved State
-                  </label>
-                  <select
+                <FormField label="Resolved State" for="filter-resolved">
+                  <Select
+                    id="filter-resolved"
                     value={draftResolved()}
                     onChange={(e) => setDraftResolved(e.target.value)}
-                    class="w-full px-2 py-1.5 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm"
+                    size="sm"
+                    class="w-full"
                   >
                     <option value="all">All</option>
                     <option value="unresolved">Unresolved</option>
                     <option value="correct">Correct</option>
                     <option value="incorrect">Incorrect</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Prediction Made By
-                  </label>
-                  <input
+                  </Select>
+                </FormField>
+                <FormField label="Prediction Made By" for="filter-made-by">
+                  <Input
+                    id="filter-made-by"
                     type="text"
                     value={draftMadeBy()}
-                    onInput={(e) => setDraftMadeBy(e.target.value)}
+                    onInput={(e) => setDraftMadeBy(e.currentTarget.value)}
                     placeholder="@handle"
-                    class="w-full px-2 py-1.5 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm"
+                    size="sm"
                   />
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Date Prediction Made
-                  </label>
-                  <div class="flex gap-1.5">
-                    <select
+                </FormField>
+                <FormField label="Date Prediction Made" for="filter-date-made">
+                  <div class="flex gap-1.5" role="group">
+                    <Select
+                      aria-label="Date made modifier"
                       value={draftDateMadeMod()}
                       onChange={(e) => setDraftDateMadeMod(e.target.value)}
-                      class="px-1.5 py-1.5 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs"
+                      size="sm"
                     >
                       <option value="on">on</option>
                       <option value="before">before</option>
                       <option value="after">after</option>
-                    </select>
-                    <input
+                    </Select>
+                    <Input
+                      id="filter-date-made"
+                      aria-label="Date made value"
                       type="date"
                       value={draftDateMade()}
-                      onInput={(e) => setDraftDateMade(e.target.value)}
-                      class="flex-1 px-2 py-1.5 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm"
+                      onInput={(e) => setDraftDateMade(e.currentTarget.value)}
+                      size="sm"
+                      class="flex-1"
                     />
                   </div>
-                </div>
-                <div>
-                  <label class="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1">
-                    Prediction Deadline
-                  </label>
-                  <div class="flex gap-1.5">
-                    <select
+                </FormField>
+                <FormField label="Prediction Deadline" for="filter-deadline">
+                  <div class="flex gap-1.5" role="group">
+                    <Select
+                      aria-label="Deadline modifier"
                       value={draftDeadlineMod()}
                       onChange={(e) => setDraftDeadlineMod(e.target.value)}
-                      class="px-1.5 py-1.5 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-xs"
+                      size="sm"
                     >
                       <option value="on">on</option>
                       <option value="before">before</option>
                       <option value="after">after</option>
-                    </select>
-                    <input
+                    </Select>
+                    <Input
+                      id="filter-deadline"
+                      aria-label="Deadline value"
                       type="date"
                       value={draftDeadline()}
-                      onInput={(e) => setDraftDeadline(e.target.value)}
-                      class="flex-1 px-2 py-1.5 border border-zinc-300 dark:border-zinc-600 rounded bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm"
+                      onInput={(e) => setDraftDeadline(e.currentTarget.value)}
+                      size="sm"
+                      class="flex-1"
                     />
                   </div>
-                </div>
+                </FormField>
                 <div class="flex justify-end gap-2 pt-1">
-                  <Button variant="secondary" size="sm" onClick={() => setPopoverOpen(false)}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setPopoverOpen(false)}
+                    inLayer
+                  >
                     Cancel
                   </Button>
                   <Button

@@ -22,7 +22,7 @@ export function LogoutButton() {
   }
 
   return (
-    <Button variant="link" onClick={handleLogout}>
+    <Button variant="secondary" onClick={handleLogout}>
       Sign out
     </Button>
   );

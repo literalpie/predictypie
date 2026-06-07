@@ -1,13 +1,24 @@
 import { createSignal, createResource, Show } from "solid-js";
-import { action, redirect, useAction } from "@solidjs/router";
+import { action, useAction, useNavigate } from "@solidjs/router";
 import { getCookie } from "@solidjs/start/http";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { createPrediction as createPredictionToPds } from "~/server/createPrediction";
 import { getSessionDid } from "~/lib/session";
-import Button from "../components/Button";
+import { createForm } from "@tanstack/solid-form";
+import Button from "~/components/Button";
+import { FormField } from "../components/FormField";
+import { Input } from "../components/Input";
 
-const createPredictionAction = action(async (formData: FormData) => {
+type PredictionInput = {
+  text: string;
+  deadline: string;
+  madeAt: string;
+  attribution: string;
+  source: string;
+};
+
+const createPredictionAction = action(async (input: PredictionInput) => {
   "use server";
 
   const did = getCookie("did");
@@ -15,11 +26,7 @@ const createPredictionAction = action(async (formData: FormData) => {
     throw new Error("Not logged in");
   }
 
-  const text = formData.get("text") as string;
-  const deadline = formData.get("deadline") as string | null;
-  const madeAt = formData.get("madeAt") as string | null;
-  const attribution = formData.get("attribution") as string | null;
-  const source = formData.get("source") as string | null;
+  const { text, deadline, madeAt, attribution, source } = input;
 
   if (!text || text.length > 500) {
     throw new Error("Prediction text is required (max 500 chars)");
@@ -33,14 +40,16 @@ const createPredictionAction = action(async (formData: FormData) => {
     attribution || undefined,
     source || undefined,
   );
-
-  return redirect("/");
 }, "createPrediction");
 
 export default function NewPrediction() {
   const createPrediction = useAction(createPredictionAction);
+  const navigate = useNavigate();
   const [sessionDid] = createResource(() => getSessionDid());
   const user = createQuery(api.auth.getUser, () => ({ did: sessionDid() ?? "" }));
+  const today = new Date().toISOString().split("T")[0];
+  const [submitError, setSubmitError] = createSignal<string | null>(null);
+
   const attributionPlaceholder = () => {
     const u = user();
     if (u) return `@${u.handle}`;
@@ -48,39 +57,31 @@ export default function NewPrediction() {
     if (did) return did;
     return "";
   };
-  const [text, setText] = createSignal("");
-  const [deadline, setDeadline] = createSignal("");
-  const today = new Date().toISOString().split("T")[0];
-  const [madeAt, setMadeAt] = createSignal(today);
-  const [attribution, setAttribution] = createSignal("");
-  const [source, setSource] = createSignal("");
-  const [loading, setLoading] = createSignal(false);
-  const [error, setError] = createSignal<string | null>(null);
 
-  async function handleSubmit(e: SubmitEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const form = createForm(() => ({
+    defaultValues: {
+      text: "",
+      deadline: "",
+      madeAt: today,
+      attribution: "",
+      source: "https://",
+    } as PredictionInput,
+    onSubmit: async ({ value }) => {
+      setSubmitError(null);
+      try {
+        await createPrediction({
+          ...value,
+          source: value.source === "https://" ? "" : value.source,
+        });
+        navigate("/");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to create prediction";
+        setSubmitError(message);
+      }
+    },
+  }));
 
-    try {
-      const formData = new FormData();
-      formData.set("text", text());
-      if (deadline()) {
-        formData.set("deadline", deadline());
-      }
-      formData.set("madeAt", madeAt());
-      if (attribution()) {
-        formData.set("attribution", attribution());
-      }
-      if (source()) {
-        formData.set("source", source());
-      }
-      await createPrediction(formData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create prediction");
-      setLoading(false);
-    }
-  }
+  const isSubmitting = form.useStore((state) => state.isSubmitting);
 
   return (
     <main class="max-w-2xl mx-auto p-4">
@@ -89,94 +90,127 @@ export default function NewPrediction() {
         fallback={
           <p>
             You must{" "}
-            <a href="/oauth/login" class="text-blue-600 dark:text-blue-400 hover:underline">
-              sign in
-            </a>{" "}
+            <Button variant="link" href="/oauth/login">sign in</Button>{" "}
             to create a prediction.
           </p>
         }
       >
         <h1 class="text-2xl font-bold mb-4">New Prediction</h1>
 
-        <form onSubmit={handleSubmit} class="space-y-4">
-          <div>
-            <label for="text" class="block text-sm font-medium text-zinc-700 mb-1">
-              What do you predict?
-            </label>
-            <textarea
-              id="text"
-              value={text()}
-              onInput={(e) => setText(e.target.value)}
-              placeholder="I predict that..."
-              maxLength={500}
-              class="w-full px-3 py-2 border border-zinc-300 rounded-lg bg-white text-zinc-900 h-32"
-              disabled={loading()}
-            />
-            <p class="text-sm text-zinc-500 text-right">{text().length}/500</p>
-          </div>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          class="space-y-4"
+        >
+          <form.Field
+            name="text"
+            validators={{
+              onChange: ({ value }) => {
+                if (!value) return "Prediction text is required";
+                if (value.length > 500) return "Max 500 characters";
+                return undefined;
+              },
+            }}
+          >
+            {(field) => (
+              <FormField
+                label="What do you predict?"
+                for="text"
+                error={field().state.meta.errors?.[0]}
+              >
+                <textarea
+                  id="text"
+                  value={field().state.value}
+                  onInput={(e) => field().handleChange(e.target.value)}
+                  placeholder="I predict that..."
+                  maxLength={500}
+                  disabled={isSubmitting()}
+                  class="w-full border border-zinc-300 bg-white text-zinc-900 disabled:opacity-50 px-3 py-2 rounded-lg h-32 dark:bg-zinc-800 dark:border-zinc-600 dark:text-zinc-100"
+                />
+                <p class="text-sm text-zinc-500 text-right">{field().state.value.length}/500</p>
+              </FormField>
+            )}
+          </form.Field>
 
-          <div>
-            <label for="deadline" class="block text-sm font-medium text-zinc-700 mb-1">
-              Deadline (optional)
-            </label>
-            <input
-              id="deadline"
-              type="date"
-              value={deadline()}
-              onInput={(e) => setDeadline(e.target.value)}
-              class="w-full px-3 py-2 border border-zinc-300 rounded-lg bg-white text-zinc-900"
-              disabled={loading()}
-            />
-          </div>
+          <form.Field name="deadline">
+            {(field) => (
+              <FormField label="Deadline (optional)" for="deadline">
+                <Input
+                  id="deadline"
+                  type="date"
+                  value={field().state.value}
+                  onInput={(e) => field().handleChange(e.currentTarget.value)}
+                  disabled={isSubmitting()}
+                />
+              </FormField>
+            )}
+          </form.Field>
 
-          <div>
-            <label for="madeAt" class="block text-sm font-medium text-zinc-700 mb-1">
-              When was it made?
-            </label>
-            <input
-              id="madeAt"
-              type="date"
-              value={madeAt()}
-              onInput={(e) => setMadeAt(e.target.value)}
-              class="w-full px-3 py-2 border border-zinc-300 rounded-lg bg-white text-zinc-900"
-              disabled={loading()}
-            />
-          </div>
+          <form.Field name="madeAt">
+            {(field) => (
+              <FormField label="When was it made?" for="madeAt">
+                <Input
+                  id="madeAt"
+                  type="date"
+                  value={field().state.value}
+                  onInput={(e) => field().handleChange(e.currentTarget.value)}
+                  disabled={isSubmitting()}
+                />
+              </FormField>
+            )}
+          </form.Field>
 
-          <div>
-            <label for="attribution" class="block text-sm font-medium text-zinc-700 mb-1">
-              Who made it?
-            </label>
-            <input
-              id="attribution"
-              type="text"
-              value={attribution()}
-              onInput={(e) => setAttribution(e.target.value)}
-              placeholder={attributionPlaceholder()}
-              class="w-full px-3 py-2 border border-zinc-300 rounded-lg bg-white text-zinc-900"
-              disabled={loading()}
-            />
-          </div>
+          <form.Field name="attribution">
+            {(field) => (
+              <FormField label="Who made it?" for="attribution">
+                <Input
+                  id="attribution"
+                  type="text"
+                  value={field().state.value}
+                  onInput={(e) => field().handleChange(e.currentTarget.value)}
+                  placeholder={attributionPlaceholder()}
+                  disabled={isSubmitting()}
+                />
+              </FormField>
+            )}
+          </form.Field>
 
-          <div>
-            <label for="source" class="block text-sm font-medium text-zinc-700 mb-1">
-              Source URL (optional)
-            </label>
-            <input
-              id="source"
-              type="url"
-              value={source()}
-              onInput={(e) => setSource(e.target.value)}
-              placeholder="https://example.com/proof"
-              class="w-full px-3 py-2 border border-zinc-300 rounded-lg bg-white text-zinc-900"
-              disabled={loading()}
-            />
-          </div>
+          <form.Field
+            name="source"
+            validators={{
+              onChange: ({ value }) => {
+                if (!value || value === "https://") return undefined;
+                if (!/^https?:\/\/./.test(value)) return "Must be a valid http or https URL";
+                return undefined;
+              },
+            }}
+          >
+            {(field) => (
+              <FormField
+                label="Source URL (optional)"
+                for="source"
+                error={field().state.meta.errors?.[0]}
+              >
+                <Input
+                  id="source"
+                  type="text"
+                  value={field().state.value}
+                  onInput={(e) => field().handleChange(e.currentTarget.value)}
+                  placeholder="https://example.com/proof"
+                  disabled={isSubmitting()}
+                />
+              </FormField>
+            )}
+          </form.Field>
 
-          {error() && <p class="text-red-500 text-sm">{error()}</p>}
+          <Show when={submitError()}>
+            <p class="text-red-500 text-sm">{submitError()}</p>
+          </Show>
 
-          <Button type="submit" disabled={loading() || !text()} class="w-full">
-            {loading() ? "Creating..." : "Create Prediction"}
+          <Button type="submit" disabled={isSubmitting()} class="w-full">
+            {isSubmitting() ? "Creating..." : "Create Prediction"}
           </Button>
         </form>
       </Show>
