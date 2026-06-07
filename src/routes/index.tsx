@@ -135,6 +135,8 @@ export default function Home() {
             <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18" />
             <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18" />
             <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18" />
+            <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18 opacity-50" />
+            <li class="border border-zinc-200 dark:border-zinc-700 rounded bg-zinc-50 dark:bg-zinc-800/50 animate-pulse h-18 opacity-20" />
           </ul>
         }
       >
