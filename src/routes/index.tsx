@@ -17,7 +17,9 @@ import {
 import { getSessionDid } from "../lib/session";
 import Button from "../components/Button";
 import { LogoutButton } from "../components/LogoutButton";
-import ThemeToggle from "../components/ThemeToggle";
+import { clientOnly } from "@solidjs/start";
+
+const ThemeToggle = clientOnly(() => import("../components/ThemeToggle"));
 
 const resolveAction = action(async (formData: FormData) => {
   "use server";
@@ -28,7 +30,7 @@ const resolveAction = action(async (formData: FormData) => {
   const resolvedAs = formData.get("resolvedAs") as "correct" | "incorrect";
 
   await resolvePredictionOnPds(did, atUri, resolvedAs);
-  const search = formData.get("search") as string || "";
+  const search = (formData.get("search") as string) || "";
   return redirect("/" + search);
 }, "resolvePrediction");
 
@@ -39,7 +41,7 @@ const deleteAction = action(async (formData: FormData) => {
 
   const atUri = formData.get("atUri") as string;
   await deletePredictionOnPds(did, atUri);
-  const search = formData.get("search") as string || "";
+  const search = (formData.get("search") as string) || "";
   return redirect("/" + search);
 }, "deletePrediction");
 
@@ -114,12 +116,12 @@ export default function Home() {
     <main class="max-w-2xl mx-auto p-4 min-h-screen">
       <header class="flex justify-between items-center mb-4">
         <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">PredictyPie</h1>
-        <nav class="flex gap-4 items-center">
+        <nav>
           <ThemeToggle />
           <Show when={sessionDid()}>
-            <a href="/new" class="text-blue-600 dark:text-blue-400 hover:underline">
+            <Button variant="secondary" href="/new">
               New Prediction
-            </a>
+            </Button>
             <LogoutButton />
           </Show>
           <Show when={sessionDid() === null}>
@@ -235,7 +237,8 @@ export default function Home() {
                         <div class="flex gap-2 pt-2 items-center -ml-3">
                           <Show when={!pred.resolvedAs}>
                             <Button
-                              variant="success"
+                              variant="secondary"
+                              class="text-green-700 dark:text-green-300 dark:hover:bg-zinc-700"
                               onClick={() => {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
@@ -247,7 +250,8 @@ export default function Home() {
                               Mark Correct
                             </Button>
                             <Button
-                              variant="error"
+                              variant="secondary"
+                              class="text-red-700 dark:text-red-300 dark:hover:bg-zinc-700"
                               onClick={() => {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);

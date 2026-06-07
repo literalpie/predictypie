@@ -75,7 +75,10 @@ export function FilterBar() {
           if (open) resetDrafts();
         }}
       >
-        <PopoverTrigger class="px-3 py-1 rounded font-medium transition-colors bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 text-sm flex items-center gap-1.5">
+        <PopoverTrigger
+          render={(props) => <Button {...props} variant="secondary" />}
+          class="flex items-center gap-1.5"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -170,7 +173,12 @@ export function FilterBar() {
                   </div>
                 </FormField>
                 <div class="flex justify-end gap-2 pt-1">
-                  <Button variant="secondary" size="sm" onClick={() => setPopoverOpen(false)}>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setPopoverOpen(false)}
+                    class="dark:hover:bg-zinc-700"
+                  >
                     Cancel
                   </Button>
                   <Button

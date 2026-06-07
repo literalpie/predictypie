@@ -31,6 +31,7 @@
     "oxfmt": "^0.47.0",
     "oxlint": "^1.62.0",
     "solid-js": "^1.9.12",
+    "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.2.4",
     "vite": "^7.0.0",
     "vite-plugin-solid": "^2.11.0"

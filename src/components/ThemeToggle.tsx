@@ -4,7 +4,7 @@ import Button from "./Button";
 export default function ThemeToggle() {
   return (
     <Button
-      variant="link"
+      variant="secondary"
       onClick={toggleTheme}
       title={`Switch to ${theme() === "light" ? "dark" : "light"} mode`}
     >

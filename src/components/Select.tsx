@@ -1,4 +1,5 @@
 import { mergeProps, splitProps, type JSX } from "solid-js";
+import { cn } from "../lib/cn";
 
 type SelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {
   size?: "sm" | "md";
@@ -14,6 +15,6 @@ const sizes: Record<string, string> = {
 export function Select(p: SelectProps) {
   const [locals, rest] = splitProps(p, ["size", "class"]);
   const props = mergeProps({ size: "md" as const }, locals);
-  const cls = `${base} ${sizes[props.size]} ${props.class ?? ""}`;
+  const cls = cn(base, sizes[props.size], props.class);
   return <select class={cls} {...rest} />;
 }
