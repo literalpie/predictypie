@@ -168,11 +168,7 @@ export function FilterBar() {
                   </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-1">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setPopoverOpen(false)}
-                  >
+                  <Button variant="secondary" size="sm" onClick={() => setPopoverOpen(false)}>
                     Cancel
                   </Button>
                   <Button

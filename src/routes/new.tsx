@@ -175,11 +175,7 @@ export default function NewPrediction() {
 
           {error() && <p class="text-red-500 text-sm">{error()}</p>}
 
-          <Button
-            type="submit"
-            disabled={loading() || !text()}
-            class="w-full"
-          >
+          <Button type="submit" disabled={loading() || !text()} class="w-full">
             {loading() ? "Creating..." : "Create Prediction"}
           </Button>
         </form>

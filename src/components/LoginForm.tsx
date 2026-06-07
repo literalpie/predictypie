@@ -45,11 +45,7 @@ export function LoginForm() {
       </div>
       {error() && <p class="text-red-500 text-sm">{error()}</p>}
 
-      <Button
-        type="submit"
-        disabled={loading() || !handle()}
-        class="w-full"
-      >
+      <Button type="submit" disabled={loading() || !handle()} class="w-full">
         {loading() ? "Signing in..." : "Sign in"}
       </Button>
     </form>
