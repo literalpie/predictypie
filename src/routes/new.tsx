@@ -54,7 +54,9 @@ export default function NewPrediction() {
         fallback={
           <p>
             You must{" "}
-            <Button variant="link" href="/oauth/login">sign in</Button>{" "}
+            <Button variant="link" href="/oauth/login" class="px-0 inline">
+              sign in
+            </Button>{" "}
             to create a prediction.
           </p>
         }
