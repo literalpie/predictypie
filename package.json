@@ -13,33 +13,40 @@
     "gen-key": "tsx scripts/gen-key.ts"
   },
   "dependencies": {
-    "@atproto/common-web": "^0.4.21",
-    "@atproto/identity": "^0.4.12",
-    "@atproto/lex": "^0.0.25",
-    "@atproto/oauth-client-node": "^0.3.17",
-    "@atproto/syntax": "^0.5.4",
-    "@atproto/tap": "^0.2.13",
-    "@msviderok/base-ui-solid": "1.0.0-beta.11",
+    "@atproto/common-web": "^0.5.0",
+    "@atproto/identity": "^0.5.0",
+    "@atproto/lex": "^0.1.3",
+    "@atproto/oauth-client-node": "^0.4.1",
+    "@atproto/syntax": "^0.6.1",
+    "@atproto/tap": "^0.3.0",
+    "@msviderok/base-ui-solid": "^1.0.0-beta.11",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.16.1",
-    "@solidjs/start": "2.0.0-alpha.2",
+    "@solidjs/start": "2.0.0-alpha.3",
     "@solidjs/vite-plugin-nitro-2": "^0.1.0",
-    "@tailwindcss/vite": "^4.2.4",
+    "@tailwindcss/vite": "^4.3.1",
     "@tanstack/solid-form": "^1.33.0",
     "@types/node": "24.11.0",
-    "convex": "^1.37.0",
-    "oxfmt": "^0.47.0",
-    "oxlint": "^1.62.0",
-    "solid-js": "^1.9.12",
+    "convex": "^1.41.0",
+    "oxfmt": "^0.54.0",
+    "oxlint": "^1.69.0",
+    "solid-js": "^1.9.13",
     "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.2.4",
-    "vite": "^7.0.0",
+    "tailwindcss": "^4.3.1",
+    "vite": "^7.3.5",
     "vite-plugin-solid": "^2.11.0"
   },
   "devDependencies": {
-    "tsx": "^4.21.0"
+    "tsx": "^4.22.4"
   },
   "engines": {
     "node": ">=24"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "11.6.0",
+      "onFail": "download"
+    }
   }
 }
