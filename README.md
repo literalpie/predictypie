@@ -1,8 +1,16 @@
 # PredictyPie
 
-An AT Protocol app for making and browsing predictions. Users store predictions in their own PDS, and they're mirrored to Convex via Tap webhook.
+A social app for making and browsing predictions. It uses AT Proto, so you can sign in with Bluesky or any other AT Proto handle.
 
-## Quick Start
+## User Guide
+
+* Click on a prediction to see more details about it
+* Click "New Prediction" (after signing in) to create a prediction.
+  * You can add a deadline for the prediction, or make it more open-ended
+  * If you are tracking a prediction made by someone else, fill out the "who made it" field. This can be something like a BlueSky handle, YouTube channel, or just a name.
+  * If you are tracking a prediction made by someone else, I suggest also supplying a "source". This should be a URL where the person made the prediction.
+
+## Developer Quick Start
 
 ```bash
 # Install dependencies

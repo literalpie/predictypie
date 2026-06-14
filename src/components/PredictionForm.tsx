@@ -96,7 +96,7 @@ export default function PredictionForm(props: Props) {
 
       <form.Field name="deadline">
         {(field) => (
-          <FormField label="Deadline (optional)" for="deadline">
+          <FormField label="Deadline" for="deadline">
             <Input
               id="deadline"
               type="date"
@@ -149,7 +149,7 @@ export default function PredictionForm(props: Props) {
       >
         {(field) => (
           <FormField
-            label="Source URL (optional)"
+            label="Source URL"
             for="source"
             error={field().state.meta.errors?.[0]}
           >
