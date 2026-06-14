@@ -2,14 +2,22 @@ import { splitProps, createMemo, type JSX, type Component } from "solid-js";
 import { cn } from "../lib/cn";
 
 type ButtonProps = {
-  variant?: "primary" | "secondary" | "link" | "success" | "error" | "danger";
+  variant?: "primary" | "secondary" | "link" | "success";
   size?: "sm";
   href?: string;
   inLayer?: boolean;
-} & JSX.ButtonHTMLAttributes<HTMLButtonElement> & JSX.AnchorHTMLAttributes<HTMLAnchorElement>;
+} & JSX.ButtonHTMLAttributes<HTMLButtonElement> &
+  JSX.AnchorHTMLAttributes<HTMLAnchorElement>;
 
 const Button: Component<ButtonProps> = (props) => {
-  const [local, rest] = splitProps(props, ["variant", "size", "class", "children", "href", "inLayer"]);
+  const [local, rest] = splitProps(props, [
+    "variant",
+    "size",
+    "class",
+    "children",
+    "href",
+    "inLayer",
+  ]);
 
   const base = "font-medium transition-colors disabled:opacity-50 cursor-pointer";
 
@@ -24,8 +32,6 @@ const Button: Component<ButtonProps> = (props) => {
       "bg-transparent hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100",
     link: "text-blue-600 dark:text-blue-400 hover:underline",
     success: "text-green-600 dark:text-green-400 hover:underline",
-    error: "text-red-600 dark:text-red-400 hover:underline",
-    danger: "text-zinc-400 hover:text-red-500 dark:text-zinc-500 dark:hover:text-red-400",
   };
 
   const className = createMemo(() => {

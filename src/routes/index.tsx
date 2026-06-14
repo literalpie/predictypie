@@ -245,8 +245,17 @@ export default function Home() {
                             </Button>
                           </Show>
                           <Button
-                            variant="danger"
+                            variant="secondary"
+                            inLayer
                             class="ml-auto"
+                            href={`/edit/${pred.rkey}`}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            inLayer
+                            class="hover:text-red-500 dark:hover:text-red-400"
                             onClick={() => {
                               if (confirm("Are you sure you want to delete this prediction?")) {
                                 const fd = new FormData();

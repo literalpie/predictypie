@@ -79,6 +79,41 @@ export const resolvePrediction = async (
   );
 };
 
+export const updatePrediction = async (
+  did: string,
+  atUri: string,
+  fields: {
+    text?: string;
+    deadline?: string;
+    madeAt?: string;
+    attribution?: string;
+    source?: string;
+  },
+) => {
+  const parts = atUri.replace("at://", "").split("/");
+  const rkey = parts[2];
+
+  const client = await getOAuthClient();
+  const oauthSession = await client.restore(did);
+  const lexClient = new Client(oauthSession);
+
+  const existing = await lexClient.get(predictionMain, { rkey });
+
+  await lexClient.put(
+    predictionMain,
+    {
+      text: fields.text ?? existing.value.text,
+      deadline: fields.deadline ? l.toDatetimeString(new Date(fields.deadline)) : existing.value.deadline,
+      createdAt: existing.value.createdAt,
+      madeAt: fields.madeAt ?? existing.value.madeAt,
+      attribution: fields.attribution ?? existing.value.attribution,
+      source: fields.source ?? existing.value.source,
+      resolvedAs: existing.value.resolvedAs,
+    },
+    { rkey },
+  );
+};
+
 export const deletePrediction = async (did: string, atUri: string) => {
   const uri = new AtUri(atUri);
 
