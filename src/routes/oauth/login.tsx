@@ -34,7 +34,10 @@ export default function LoginPage() {
 
   return (
     <main class="max-w-2xl mx-auto p-4">
-      <h1 class="text-2xl font-bold mb-4">Sign in</h1>
+      <h1 class="text-2xl font-bold mb-2">Sign in</h1>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
+        You can sign in with your Bluesky handle, or any other AT Protocol handle.
+      </p>
 
       <form onSubmit={handleSubmit} class="space-y-4">
         <FormField label="Handle" for="handle" error={error() ?? undefined}>

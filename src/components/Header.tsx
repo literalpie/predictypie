@@ -1,22 +1,13 @@
-import { Show, createSignal, onMount } from "solid-js";
+import { Show, Suspense, createResource } from "solid-js";
 import { clientOnly } from "@solidjs/start";
 import Button from "./Button";
 import { LogoutButton } from "./LogoutButton";
+import { getSessionDid } from "~/lib/session";
 
 const ThemeToggle = clientOnly(() => import("./ThemeToggle"));
 
-function getSessionDidFromCookie(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;)did=([^;]+)/);
-  return match ? match[1] : null;
-}
-
 export default function Header() {
-  const [sessionDid, setSessionDid] = createSignal<string | null | undefined>();
-
-  onMount(() => {
-    setSessionDid(getSessionDidFromCookie());
-  });
+  const [sessionDid] = createResource(() => getSessionDid());
 
   return (
     <header class="sticky top-0 z-10 header-scroll-anim">
@@ -26,17 +17,19 @@ export default function Header() {
         </a>
         <nav class="flex gap-2 items-center">
           <ThemeToggle />
-          <Show when={sessionDid()}>
-            <Button variant="secondary" href="/new">
-              New Prediction
-            </Button>
-            <LogoutButton />
-          </Show>
-          <Show when={sessionDid() === null}>
-            <Button variant="secondary" href="/oauth/login">
-              Sign in
-            </Button>
-          </Show>
+          <Suspense>
+            <Show when={sessionDid()}>
+              <Button variant="secondary" href="/new">
+                New Prediction
+              </Button>
+              <LogoutButton />
+            </Show>
+            <Show when={sessionDid() === null}>
+              <Button variant="secondary" href="/oauth/login">
+                Sign in
+              </Button>
+            </Show>
+          </Suspense>
         </nav>
       </div>
     </header>
