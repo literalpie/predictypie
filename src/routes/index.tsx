@@ -159,7 +159,7 @@ export default function Home() {
                           >
                             <Tooltip
                               text={pred.attribution!}
-                              tooltip={`@${pred.author?.handle ?? pred.authorDid}`}
+                              tooltip={`Submitted by: @${pred.author?.handle ?? pred.authorDid}`}
                               class="underline decoration-dotted underline-offset-2 cursor-default hover:text-blue-700 dark:hover:text-blue-400"
                               onClick={(e) => {
                                 e.stopPropagation();
