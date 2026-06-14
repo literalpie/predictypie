@@ -14,3 +14,32 @@ body {
 .dark body {
   @apply bg-zinc-900;
 }
+
+:root {
+  --header-start-bg: white;
+  --header-end-bg: white;
+  --header-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.dark {
+  --header-start-bg: var(--color-zinc-900);
+  --header-end-bg: #1f1f23; /* like zinc-850 */
+  --header-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-scroll-anim {
+  animation: header-scroll linear forwards;
+  animation-timeline: scroll();
+  animation-range: 0px 50px;
+}
+
+@keyframes header-scroll {
+  from {
+    background-color: var(--header-start-bg);
+    box-shadow: none;
+  }
+  to {
+    background-color: var(--header-end-bg);
+    box-shadow: var(--header-shadow);
+  }
+}

@@ -16,10 +16,6 @@ import {
 } from "~/server/createPrediction";
 import { getSessionDid } from "../lib/session";
 import Button from "../components/Button";
-import { LogoutButton } from "../components/LogoutButton";
-import { clientOnly } from "@solidjs/start";
-
-const ThemeToggle = clientOnly(() => import("../components/ThemeToggle"));
 
 const resolveAction = action(async (formData: FormData) => {
   "use server";
@@ -113,24 +109,7 @@ export default function Home() {
   };
 
   return (
-    <main class="max-w-2xl mx-auto p-4 min-h-screen">
-      <header class="flex justify-between items-center mb-4">
-        <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">PredictyPie</h1>
-        <nav>
-          <ThemeToggle />
-          <Show when={sessionDid()}>
-            <Button variant="secondary" href="/new">
-              New Prediction
-            </Button>
-            <LogoutButton />
-          </Show>
-          <Show when={sessionDid() === null}>
-            <Button variant="secondary" href="/oauth/login">
-              Sign in
-            </Button>
-          </Show>
-        </nav>
-      </header>
+    <main class="max-w-2xl mx-auto p-4">
       <FilterBar />
       <Show
         when={predictions()}

@@ -5,6 +5,7 @@ import { Suspense } from "solid-js";
 import "./app.css";
 import { ConvexClient } from "convex/browser";
 import { ConvexContext } from "./lib/convex";
+import Header from "./components/Header";
 
 const convex = new ConvexClient(import.meta.env.VITE_CONVEX_URL!);
 
@@ -15,6 +16,7 @@ export default function App() {
         <ConvexContext.Provider value={convex}>
           <MetaProvider>
             <Title>PredictyPie</Title>
+            <Header />
             <Suspense>{props.children}</Suspense>
           </MetaProvider>
         </ConvexContext.Provider>
