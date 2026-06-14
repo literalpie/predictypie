@@ -1,4 +1,4 @@
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, createRoot } from "solid-js";
 import { isServer } from "solid-js/web";
 
 type Theme = "light" | "dark";
@@ -23,13 +23,17 @@ const setThemeCookie = (theme: Theme) => {
   }
 };
 
-const [theme, setTheme] = createSignal<Theme>(getInitialTheme());
+const [theme, setTheme] = createRoot(() => {
+  const [t, setT] = createSignal<Theme>(getInitialTheme());
 
-createEffect(() => {
-  if (isServer) return;
-  const current = theme();
-  document.documentElement.classList.toggle("dark", current === "dark");
-  document.documentElement.style.colorScheme = current;
+  createEffect(() => {
+    if (isServer) return;
+    const current = t();
+    document.documentElement.classList.toggle("dark", current === "dark");
+    document.documentElement.style.colorScheme = current;
+  });
+
+  return [t, setT] as const;
 });
 
 export function toggleTheme() {
