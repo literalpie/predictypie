@@ -1,6 +1,6 @@
-import { createResource, Show } from "solid-js";
-import { action, useAction, useNavigate } from "@solidjs/router";
-import { getCookie } from "@solidjs/start/http";
+import { createMemo, Show } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import { getCookie } from "~/lib/cookies";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
 import { createPrediction as createPredictionToPds } from "~/server/createPrediction";
@@ -9,7 +9,7 @@ import Button from "~/components/Button";
 import PredictionForm from "../components/PredictionForm";
 import type { PredictionFormValues } from "../components/PredictionForm";
 
-const createPredictionAction = action(async (input: PredictionFormValues) => {
+async function createPrediction(input: PredictionFormValues) {
   "use server";
 
   const did = getCookie("did");
@@ -31,12 +31,11 @@ const createPredictionAction = action(async (input: PredictionFormValues) => {
     attribution || undefined,
     source || undefined,
   );
-}, "createPrediction");
+}
 
 export default function NewPrediction() {
-  const createPrediction = useAction(createPredictionAction);
   const navigate = useNavigate();
-  const [sessionDid] = createResource(() => getSessionDid());
+  const sessionDid = createMemo(() => getSessionDid());
   const user = createQuery(api.auth.getUser, () => ({ did: sessionDid() ?? "" }));
 
   const attributionPlaceholder = () => {

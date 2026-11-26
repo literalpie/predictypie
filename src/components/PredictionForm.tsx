@@ -1,5 +1,4 @@
 import { createSignal, Show } from "solid-js";
-import { createForm } from "@tanstack/solid-form";
 import Button from "./Button";
 import { FormField } from "./FormField";
 import { Input } from "./Input";
@@ -12,6 +11,9 @@ export type PredictionFormValues = {
   source: string;
 };
 
+type FieldName = keyof PredictionFormValues;
+type FieldErrors = Partial<Record<FieldName, string>>;
+
 type Props = {
   defaultValues?: Partial<PredictionFormValues>;
   onSubmit: (values: PredictionFormValues) => Promise<void>;
@@ -20,150 +22,130 @@ type Props = {
   attributionPlaceholder?: string;
 };
 
+function validateField(name: FieldName, value: string): string | undefined {
+  if (name === "text") {
+    if (!value) return "Prediction text is required";
+    if (value.length > 500) return "Max 500 characters";
+  }
+
+  if (name === "source" && value && value !== "https://" && !/^https?:\/\/./.test(value)) {
+    return "Must be a valid http or https URL";
+  }
+
+  return undefined;
+}
+
 export default function PredictionForm(props: Props) {
   const [submitError, setSubmitError] = createSignal<string | null>(null);
-  const today = new Date().toISOString().split("T")[0];
+  const [isSubmitting, setIsSubmitting] = createSignal(false);
+  const [errors, setErrors] = createSignal<FieldErrors>({});
 
-  const form = createForm(() => {
-    const builtInDefaults: PredictionFormValues = {
-      text: "",
-      deadline: "",
-      madeAt: today,
-      attribution: "",
-      source: "https://",
-    };
-
+  const [values, setValues] = createSignal<PredictionFormValues>(() => {
+    const today = new Date().toISOString().split("T")[0];
+    const defaults = props.defaultValues;
     return {
-      defaultValues: {
-        ...builtInDefaults,
-        ...props.defaultValues,
-        source: props.defaultValues?.source || builtInDefaults.source,
-      },
-    onSubmit: async ({ value }) => {
-      setSubmitError(null);
-      try {
-        await props.onSubmit({
-          ...value,
-          source: value.source === "https://" ? "" : value.source,
-        });
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Submission failed";
-        setSubmitError(message);
-      }
-    },
+      text: defaults?.text ?? "",
+      deadline: defaults?.deadline ?? "",
+      madeAt: defaults?.madeAt ?? today,
+      attribution: defaults?.attribution ?? "",
+      source: defaults?.source || "https://",
     };
   });
 
-  const isSubmitting = form.useStore((state) => state.isSubmitting);
+  const setField = (name: FieldName, value: string) => {
+    setValues((current) => ({ ...current, [name]: value }));
+    setErrors((current) => {
+      const next = { ...current };
+      const message = validateField(name, value);
+      if (message) next[name] = message;
+      else delete next[name];
+      return next;
+    });
+  };
+
+  const submit = async (event: SubmitEvent) => {
+    event.preventDefault();
+
+    const current = values();
+    const nextErrors: FieldErrors = {};
+    for (const name of Object.keys(current) as FieldName[]) {
+      const message = validateField(name, current[name]);
+      if (message) nextErrors[name] = message;
+    }
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setSubmitError(null);
+    setIsSubmitting(true);
+    try {
+      await props.onSubmit({
+        ...current,
+        source: current.source === "https://" ? "" : current.source,
+      });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Submission failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-      class="space-y-4"
-    >
-      <form.Field
-        name="text"
-        validators={{
-          onChange: ({ value }) => {
-            if (!value) return "Prediction text is required";
-            if (value.length > 500) return "Max 500 characters";
-            return undefined;
-          },
-        }}
-      >
-        {(field) => (
-          <FormField
-            label="What do you predict?"
-            for="text"
-            error={field().state.meta.errors?.[0]}
-          >
-            <textarea
-              id="text"
-              value={field().state.value}
-              onInput={(e) => field().handleChange(e.target.value)}
-              placeholder="I predict that..."
-              maxLength={500}
-              disabled={isSubmitting()}
-              class="w-full border border-zinc-300 bg-white text-zinc-900 disabled:opacity-50 px-3 py-2 rounded-lg h-32 dark:bg-zinc-800 dark:border-zinc-600 dark:text-zinc-100"
-            />
-            <p class="text-sm text-zinc-500 text-right">{field().state.value.length}/500</p>
-          </FormField>
-        )}
-      </form.Field>
+    <form onSubmit={submit} class="space-y-4">
+      <FormField label="What do you predict?" for="text" error={errors().text}>
+        <textarea
+          id="text"
+          value={values().text}
+          onInput={(event) => setField("text", event.currentTarget.value)}
+          placeholder="I predict that..."
+          maxlength={500}
+          disabled={isSubmitting()}
+          class="w-full border border-zinc-300 bg-white text-zinc-900 disabled:opacity-50 px-3 py-2 rounded-lg h-32 dark:bg-zinc-800 dark:border-zinc-600 dark:text-zinc-100"
+        />
+        <p class="text-sm text-zinc-500 text-right">{values().text.length}/500</p>
+      </FormField>
 
-      <form.Field name="deadline">
-        {(field) => (
-          <FormField label="Deadline" for="deadline">
-            <Input
-              id="deadline"
-              type="date"
-              value={field().state.value}
-              onInput={(e) => field().handleChange(e.currentTarget.value)}
-              disabled={isSubmitting()}
-            />
-          </FormField>
-        )}
-      </form.Field>
+      <FormField label="Deadline" for="deadline" error={errors().deadline}>
+        <Input
+          id="deadline"
+          type="date"
+          value={values().deadline}
+          onInput={(event) => setField("deadline", event.currentTarget.value)}
+          disabled={isSubmitting()}
+        />
+      </FormField>
 
-      <form.Field name="madeAt">
-        {(field) => (
-          <FormField label="When was it made?" for="madeAt">
-            <Input
-              id="madeAt"
-              type="date"
-              value={field().state.value}
-              onInput={(e) => field().handleChange(e.currentTarget.value)}
-              disabled={isSubmitting()}
-            />
-          </FormField>
-        )}
-      </form.Field>
+      <FormField label="When was it made?" for="madeAt" error={errors().madeAt}>
+        <Input
+          id="madeAt"
+          type="date"
+          value={values().madeAt}
+          onInput={(event) => setField("madeAt", event.currentTarget.value)}
+          disabled={isSubmitting()}
+        />
+      </FormField>
 
-      <form.Field name="attribution">
-        {(field) => (
-          <FormField label="Who made it?" for="attribution">
-            <Input
-              id="attribution"
-              type="text"
-              value={field().state.value}
-              onInput={(e) => field().handleChange(e.currentTarget.value)}
-              placeholder={props.attributionPlaceholder}
-              disabled={isSubmitting()}
-            />
-          </FormField>
-        )}
-      </form.Field>
+      <FormField label="Who made it?" for="attribution" error={errors().attribution}>
+        <Input
+          id="attribution"
+          type="text"
+          value={values().attribution}
+          onInput={(event) => setField("attribution", event.currentTarget.value)}
+          placeholder={props.attributionPlaceholder}
+          disabled={isSubmitting()}
+        />
+      </FormField>
 
-      <form.Field
-        name="source"
-        validators={{
-          onChange: ({ value }) => {
-            if (!value || value === "https://") return undefined;
-            if (!/^https?:\/\/./.test(value)) return "Must be a valid http or https URL";
-            return undefined;
-          },
-        }}
-      >
-        {(field) => (
-          <FormField
-            label="Source URL"
-            for="source"
-            error={field().state.meta.errors?.[0]}
-          >
-            <Input
-              id="source"
-              type="text"
-              value={field().state.value}
-              onInput={(e) => field().handleChange(e.currentTarget.value)}
-              placeholder="https://example.com/proof"
-              disabled={isSubmitting()}
-            />
-          </FormField>
-        )}
-      </form.Field>
+      <FormField label="Source URL" for="source" error={errors().source}>
+        <Input
+          id="source"
+          type="text"
+          value={values().source}
+          onInput={(event) => setField("source", event.currentTarget.value)}
+          placeholder="https://example.com/proof"
+          disabled={isSubmitting()}
+        />
+      </FormField>
 
       <Show when={submitError()}>
         <p class="text-red-500 text-sm">{submitError()}</p>

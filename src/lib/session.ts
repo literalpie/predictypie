@@ -1,7 +1,7 @@
 import { query } from "@solidjs/router";
-import { getCookie } from "@solidjs/start/http";
+import { getCookie } from "./cookies";
 
 export const getSessionDid = query(async () => {
   "use server";
-  return getCookie("did") ?? null;
+  return getCookie("did");
 }, "session-did");

@@ -3,8 +3,10 @@ allowBuilds:
   core-js: false
   esbuild: false
 
+minimumReleaseAgeExclude:
+  - vite@8.4.0
+
 overrides:
-  # Nitro cannot trace npm-aliased deps (@atproto-labs/fetch-node >= 0.3.3
-  # imports undici_v6/v7/v8). Pin the last plain-undici versions.
-  "@atproto-labs/handle-resolver-node": "0.2.2"
-  "@atproto-labs/fetch-node": "0.3.2"
+  # @atproto/lex 0.1.x must use the matching 0.2.1 lex-client; 0.2.4 pulls in
+  # lex-schema 0.2.x while the generated lexicons use 0.1.x types.
+  "@atproto/lex@0.1.7>@atproto/lex-client": "0.2.1"

@@ -1,10 +1,9 @@
-"use server";
-
+import type { APIHandler } from "filesystem-routing/api";
 import { getPublicUrl } from "~/lib/getPublicUrl";
 
 const BASE_URL = getPublicUrl();
 
-export async function GET() {
+export const GET: APIHandler = async () => {
   const tokenEndpointAuthMethod = process.env.PRIVATE_KEY ? "private_key_jwt" : "none";
 
   return new Response(
@@ -27,4 +26,4 @@ export async function GET() {
       headers: { "Content-Type": "application/json" },
     },
   );
-}
+};

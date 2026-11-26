@@ -1,6 +1,6 @@
-import { createResource, Show } from "solid-js";
-import { action, useAction, useNavigate, useParams } from "@solidjs/router";
-import { getCookie } from "@solidjs/start/http";
+import { createMemo, Show } from "solid-js";
+import { useNavigate, useParams } from "@solidjs/router";
+import { getCookie } from "~/lib/cookies";
 import { api } from "../../../convex/_generated/api";
 import { createQuery } from "../../lib/convex";
 import { updatePrediction as updatePredictionOnPds } from "~/server/createPrediction";
@@ -8,7 +8,7 @@ import { getSessionDid } from "~/lib/session";
 import PredictionForm from "../../components/PredictionForm";
 import type { PredictionFormValues } from "../../components/PredictionForm";
 
-const updatePredictionAction = action(async (input: PredictionFormValues & { rkey: string }) => {
+async function updatePrediction(input: PredictionFormValues & { rkey: string }) {
   "use server";
 
   const did = getCookie("did");
@@ -29,14 +29,13 @@ const updatePredictionAction = action(async (input: PredictionFormValues & { rke
     attribution: attribution || undefined,
     source: source || undefined,
   });
-}, "updatePrediction");
+}
 
 export default function EditPrediction() {
   const params = useParams();
   const id = () => params.id!;
-  const updatePrediction = useAction(updatePredictionAction);
   const navigate = useNavigate();
-  const [sessionDid] = createResource(() => getSessionDid());
+  const sessionDid = createMemo(() => getSessionDid());
   const prediction = createQuery(api.predictions.getPrediction, () => ({ rkey: id() }));
 
   const isAuthor = () => {

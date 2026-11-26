@@ -36,14 +36,18 @@ export const createPrediction = async (
   const oauthSession = await client.restore(did);
   const lexClient = new Client(oauthSession);
 
-  const result = await lexClient.create(predictionMain, {
-    text,
-    deadline: deadline ? l.toDatetimeString(new Date(deadline)) : now,
-    createdAt: now,
-    madeAt: madeAt || undefined,
-    attribution: attribution || undefined,
-    source: source || undefined,
-  });
+  const result = await lexClient.create(
+    predictionMain,
+    {
+      text,
+      deadline: deadline ? l.toDatetimeString(new Date(deadline)) : now,
+      createdAt: now,
+      madeAt: madeAt || undefined,
+      attribution: attribution || undefined,
+      source: source || undefined,
+    },
+    {},
+  );
 
   await addRepoToTap(did);
 
@@ -103,7 +107,9 @@ export const updatePrediction = async (
     predictionMain,
     {
       text: fields.text ?? existing.value.text,
-      deadline: fields.deadline ? l.toDatetimeString(new Date(fields.deadline)) : existing.value.deadline,
+      deadline: fields.deadline
+        ? l.toDatetimeString(new Date(fields.deadline))
+        : existing.value.deadline,
       createdAt: existing.value.createdAt,
       madeAt: fields.madeAt ?? existing.value.madeAt,
       attribution: fields.attribution ?? existing.value.attribution,

@@ -1,5 +1,5 @@
 "use server";
-import { getCookie } from "@solidjs/start/http";
+import { getCookie } from "../lib/cookies";
 import { api } from "../../convex/_generated/api";
 import { convexHttpClient } from "../lib/contextHttpClient";
 

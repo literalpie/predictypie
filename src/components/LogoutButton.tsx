@@ -1,9 +1,8 @@
-import { action, useAction } from "@solidjs/router";
-import { getCookie, deleteCookie } from "@solidjs/start/http";
+import { getCookie, deleteCookie } from "~/lib/cookies";
 import { getOAuthClient } from "~/auth/client";
 import Button from "./Button";
 
-const logout = action(async () => {
+async function logout() {
   "use server";
   const client = await getOAuthClient();
   const did = getCookie("did");
@@ -11,13 +10,11 @@ const logout = action(async () => {
     await client.revoke(did);
   }
   deleteCookie("did");
-}, "logout");
+}
 
 export function LogoutButton() {
-  const logoutAction = useAction(logout);
-
   async function handleLogout() {
-    await logoutAction();
+    await logout();
     window.location.href = "/";
   }
 

@@ -1,5 +1,5 @@
-import { Show, Suspense, createResource } from "solid-js";
-import { clientOnly } from "@solidjs/start";
+import { Loading, Show, createMemo } from "solid-js";
+import { clientOnly } from "@solidjs/web";
 import Button from "./Button";
 import { LogoutButton } from "./LogoutButton";
 import { getSessionDid } from "~/lib/session";
@@ -7,7 +7,7 @@ import { getSessionDid } from "~/lib/session";
 const ThemeToggle = clientOnly(() => import("./ThemeToggle"));
 
 export default function Header() {
-  const [sessionDid] = createResource(() => getSessionDid());
+  const sessionDid = createMemo(() => getSessionDid());
 
   return (
     <header class="sticky top-0 z-10 header-scroll-anim">
@@ -17,7 +17,7 @@ export default function Header() {
         </a>
         <nav class="flex gap-2 items-center">
           <ThemeToggle />
-          <Suspense>
+          <Loading>
             <Show when={sessionDid()}>
               <Button variant="secondary" href="/new">
                 New Prediction
@@ -29,7 +29,7 @@ export default function Header() {
                 Sign in
               </Button>
             </Show>
-          </Suspense>
+          </Loading>
         </nav>
       </div>
     </header>

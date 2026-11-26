@@ -1,12 +1,6 @@
 import { Show, createSignal } from "solid-js";
 import { useSearchParams } from "@solidjs/router";
-import {
-  PopoverRoot,
-  PopoverTrigger,
-  PopoverPortal,
-  PopoverPositioner,
-  PopoverPopup,
-} from "./ClientCollapsible";
+import { Popover } from "@kobalte/core/popover";
 import Button from "./Button";
 import { FormField } from "./FormField";
 import { Input } from "./Input";
@@ -30,12 +24,12 @@ export function FilterBar() {
     return count;
   };
 
-  const [draftResolved, setDraftResolved] = createSignal(fResolved());
-  const [draftMadeBy, setDraftMadeBy] = createSignal(fMadeBy());
-  const [draftDateMade, setDraftDateMade] = createSignal(fDateMade());
-  const [draftDateMadeMod, setDraftDateMadeMod] = createSignal(fDateMadeMod());
-  const [draftDeadline, setDraftDeadline] = createSignal(fDeadline());
-  const [draftDeadlineMod, setDraftDeadlineMod] = createSignal(fDeadlineMod());
+  const [draftResolved, setDraftResolved] = createSignal(() => fResolved());
+  const [draftMadeBy, setDraftMadeBy] = createSignal(() => fMadeBy());
+  const [draftDateMade, setDraftDateMade] = createSignal(() => fDateMade());
+  const [draftDateMadeMod, setDraftDateMadeMod] = createSignal(() => fDateMadeMod());
+  const [draftDeadline, setDraftDeadline] = createSignal(() => fDeadline());
+  const [draftDeadlineMod, setDraftDeadlineMod] = createSignal(() => fDeadlineMod());
 
   const resetDrafts = () => {
     setDraftResolved(fResolved());
@@ -68,17 +62,16 @@ export function FilterBar() {
 
   return (
     <div class="flex gap-2 mb-4 items-center flex-wrap min-h-9">
-      <PopoverRoot
+      <Popover
         open={popoverOpen()}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           setPopoverOpen(open);
           if (open) resetDrafts();
         }}
+        placement="bottom-start"
+        gutter={4}
       >
-        <PopoverTrigger
-          render={(props) => <Button {...props} variant="secondary" />}
-          class="flex items-center gap-1.5"
-        >
+        <Popover.Trigger as={Button} variant="secondary" class="flex items-center gap-1.5">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -97,106 +90,99 @@ export function FilterBar() {
               {activeFilterCount()}
             </span>
           </Show>
-        </PopoverTrigger>
-        <PopoverPortal>
-          <PopoverPositioner sideOffset={4}>
-            <PopoverPopup class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-700 p-4 w-72 text-sm text-zinc-900 dark:text-zinc-100">
-              <div class="space-y-3">
-                <FormField label="Resolved State" for="filter-resolved">
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Content class="bg-white dark:bg-zinc-800 rounded-lg shadow-xl border border-zinc-200 dark:border-zinc-700 p-4 w-72 text-sm text-zinc-900 dark:text-zinc-100">
+            <div class="space-y-3">
+              <FormField label="Resolved State" for="filter-resolved">
+                <Select
+                  id="filter-resolved"
+                  value={draftResolved()}
+                  onChange={(e) => setDraftResolved(e.target.value)}
+                  size="sm"
+                  class="w-full"
+                >
+                  <option value="all">All</option>
+                  <option value="unresolved">Unresolved</option>
+                  <option value="correct">Correct</option>
+                  <option value="incorrect">Incorrect</option>
+                </Select>
+              </FormField>
+              <FormField label="Prediction Made By" for="filter-made-by">
+                <Input
+                  id="filter-made-by"
+                  type="text"
+                  value={draftMadeBy()}
+                  onInput={(e) => setDraftMadeBy(e.currentTarget.value)}
+                  placeholder="@handle"
+                  size="sm"
+                />
+              </FormField>
+              <FormField label="Date Prediction Made" for="filter-date-made">
+                <div class="flex gap-1.5" role="group">
                   <Select
-                    id="filter-resolved"
-                    value={draftResolved()}
-                    onChange={(e) => setDraftResolved(e.target.value)}
+                    aria-label="Date made modifier"
+                    value={draftDateMadeMod()}
+                    onChange={(e) => setDraftDateMadeMod(e.target.value)}
                     size="sm"
-                    class="w-full"
                   >
-                    <option value="all">All</option>
-                    <option value="unresolved">Unresolved</option>
-                    <option value="correct">Correct</option>
-                    <option value="incorrect">Incorrect</option>
+                    <option value="on">on</option>
+                    <option value="before">before</option>
+                    <option value="after">after</option>
                   </Select>
-                </FormField>
-                <FormField label="Prediction Made By" for="filter-made-by">
                   <Input
-                    id="filter-made-by"
-                    type="text"
-                    value={draftMadeBy()}
-                    onInput={(e) => setDraftMadeBy(e.currentTarget.value)}
-                    placeholder="@handle"
+                    id="filter-date-made"
+                    aria-label="Date made value"
+                    type="date"
+                    value={draftDateMade()}
+                    onInput={(e) => setDraftDateMade(e.currentTarget.value)}
                     size="sm"
+                    class="flex-1"
                   />
-                </FormField>
-                <FormField label="Date Prediction Made" for="filter-date-made">
-                  <div class="flex gap-1.5" role="group">
-                    <Select
-                      aria-label="Date made modifier"
-                      value={draftDateMadeMod()}
-                      onChange={(e) => setDraftDateMadeMod(e.target.value)}
-                      size="sm"
-                    >
-                      <option value="on">on</option>
-                      <option value="before">before</option>
-                      <option value="after">after</option>
-                    </Select>
-                    <Input
-                      id="filter-date-made"
-                      aria-label="Date made value"
-                      type="date"
-                      value={draftDateMade()}
-                      onInput={(e) => setDraftDateMade(e.currentTarget.value)}
-                      size="sm"
-                      class="flex-1"
-                    />
-                  </div>
-                </FormField>
-                <FormField label="Prediction Deadline" for="filter-deadline">
-                  <div class="flex gap-1.5" role="group">
-                    <Select
-                      aria-label="Deadline modifier"
-                      value={draftDeadlineMod()}
-                      onChange={(e) => setDraftDeadlineMod(e.target.value)}
-                      size="sm"
-                    >
-                      <option value="on">on</option>
-                      <option value="before">before</option>
-                      <option value="after">after</option>
-                    </Select>
-                    <Input
-                      id="filter-deadline"
-                      aria-label="Deadline value"
-                      type="date"
-                      value={draftDeadline()}
-                      onInput={(e) => setDraftDeadline(e.currentTarget.value)}
-                      size="sm"
-                      class="flex-1"
-                    />
-                  </div>
-                </FormField>
-                <div class="flex justify-end gap-2 pt-1">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setPopoverOpen(false)}
-                    inLayer
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => {
-                      applyFilters();
-                      setPopoverOpen(false);
-                    }}
-                  >
-                    Apply
-                  </Button>
                 </div>
+              </FormField>
+              <FormField label="Prediction Deadline" for="filter-deadline">
+                <div class="flex gap-1.5" role="group">
+                  <Select
+                    aria-label="Deadline modifier"
+                    value={draftDeadlineMod()}
+                    onChange={(e) => setDraftDeadlineMod(e.target.value)}
+                    size="sm"
+                  >
+                    <option value="on">on</option>
+                    <option value="before">before</option>
+                    <option value="after">after</option>
+                  </Select>
+                  <Input
+                    id="filter-deadline"
+                    aria-label="Deadline value"
+                    type="date"
+                    value={draftDeadline()}
+                    onInput={(e) => setDraftDeadline(e.currentTarget.value)}
+                    size="sm"
+                    class="flex-1"
+                  />
+                </div>
+              </FormField>
+              <div class="flex justify-end gap-2 pt-1">
+                <Button variant="secondary" size="sm" onClick={() => setPopoverOpen(false)} inLayer>
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    applyFilters();
+                    setPopoverOpen(false);
+                  }}
+                >
+                  Apply
+                </Button>
               </div>
-            </PopoverPopup>
-          </PopoverPositioner>
-        </PopoverPortal>
-      </PopoverRoot>
+            </div>
+          </Popover.Content>
+        </Popover.Portal>
+      </Popover>
 
       <Show when={fResolved() !== "all"}>
         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">

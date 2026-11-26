@@ -1,11 +1,13 @@
-import { mergeProps, splitProps, type JSX } from "solid-js";
+import { omit } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { cn } from "../lib/cn";
 
 type SelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {
   size?: "sm" | "md";
 };
 
-const base = "border border-zinc-300 bg-white text-zinc-900 disabled:opacity-50 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-100";
+const base =
+  "border border-zinc-300 bg-white text-zinc-900 disabled:opacity-50 dark:bg-zinc-700 dark:border-zinc-600 dark:text-zinc-100";
 
 const sizes: Record<string, string> = {
   sm: "px-2 py-1.5 text-sm rounded",
@@ -13,8 +15,7 @@ const sizes: Record<string, string> = {
 };
 
 export function Select(p: SelectProps) {
-  const [locals, rest] = splitProps(p, ["size", "class"]);
-  const props = mergeProps({ size: "md" as const }, locals);
-  const cls = cn(base, sizes[props.size], props.class);
+  const rest = omit(p, "size", "class");
+  const cls = cn(base, sizes[p.size ?? "md"], p.class);
   return <select class={cls} {...rest} />;
 }

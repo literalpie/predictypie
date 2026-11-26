@@ -1,5 +1,6 @@
 import { parseTapEvent } from "@atproto/tap";
 import { AtUri } from "@atproto/syntax";
+import type { APIHandler } from "filesystem-routing/api";
 import { api } from "../../convex/_generated/api";
 import { convexHttpClient } from "../lib/contextHttpClient";
 
@@ -9,7 +10,7 @@ async function resolveHandle(did: string): Promise<string | null> {
     if (!resp.ok) return null;
     const data = await resp.json();
     if (data.alsoKnownAs && data.alsoKnownAs.length > 0) {
-      const atUri = data.alsoKnownAs[0];
+      const atUri = data.alsoKnownAs[0] as string;
       return atUri.replace("at://", "");
     }
     return null;
@@ -18,7 +19,7 @@ async function resolveHandle(did: string): Promise<string | null> {
   }
 }
 
-export async function POST({ request }: { request: Request }) {
+export const POST: APIHandler = async ({ request }) => {
   const body = await request.json();
   const evt = parseTapEvent(body);
 
@@ -53,4 +54,4 @@ export async function POST({ request }: { request: Request }) {
   }
 
   return new Response(JSON.stringify({ success: true }));
-}
+};

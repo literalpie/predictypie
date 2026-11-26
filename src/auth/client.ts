@@ -1,4 +1,5 @@
 "use server";
+import { SCOPE } from "./scope";
 import {
   NodeOAuthClient,
   JoseKey,
@@ -10,8 +11,6 @@ import {
 import { api } from "../../convex/_generated/api";
 import { convexHttpClient } from "../lib/contextHttpClient";
 import { getPublicUrl } from "~/lib/getPublicUrl";
-
-export const SCOPE = "atproto repo:app.predictypie.prediction";
 
 const PUBLIC_URL = getPublicUrl();
 const PRIVATE_KEY = process.env.PRIVATE_KEY;

@@ -1,4 +1,5 @@
-import { splitProps, createMemo, type JSX, type Component } from "solid-js";
+import { createMemo, omit, Show, type Component } from "solid-js";
+import type { JSX } from "@solidjs/web";
 import { cn } from "../lib/cn";
 
 type ButtonProps = {
@@ -10,14 +11,7 @@ type ButtonProps = {
   JSX.AnchorHTMLAttributes<HTMLAnchorElement>;
 
 const Button: Component<ButtonProps> = (props) => {
-  const [local, rest] = splitProps(props, [
-    "variant",
-    "size",
-    "class",
-    "children",
-    "href",
-    "inLayer",
-  ]);
+  const rest = omit(props, "variant", "size", "class", "children", "href", "inLayer");
 
   const base = "font-medium transition-colors disabled:opacity-50 cursor-pointer";
 
@@ -35,27 +29,30 @@ const Button: Component<ButtonProps> = (props) => {
   };
 
   const className = createMemo(() => {
-    const variant = local.variant ?? "primary";
-    const size = local.size ?? "default";
+    const variant = props.variant ?? "primary";
+    const size = props.size ?? "default";
     let variantClasses = variants[variant];
-    if (variant === "secondary" && local.inLayer) {
+    if (variant === "secondary" && props.inLayer) {
       variantClasses = variantClasses.replace("dark:hover:bg-zinc-800", "dark:hover:bg-zinc-700");
     }
-    return cn(base, sizes[size], variantClasses, local.class);
+    return cn(base, sizes[size], variantClasses, props.class);
   });
 
-  if (local.href) {
-    return (
-      <a href={local.href} class={className()}>
-        {local.children}
-      </a>
-    );
-  }
-
   return (
-    <button class={className()} {...rest}>
-      {local.children}
-    </button>
+    <Show
+      when={props.href}
+      fallback={
+        <button class={className()} {...rest}>
+          {props.children}
+        </button>
+      }
+    >
+      {(href) => (
+        <a href={href()} class={className()}>
+          {props.children}
+        </a>
+      )}
+    </Show>
   );
 };
 

@@ -1,15 +1,12 @@
-import { For, Show, createResource, createMemo } from "solid-js";
-import {
-  CollapsibleRoot,
-  CollapsibleTrigger,
-  CollapsiblePanel,
-} from "../components/ClientCollapsible";
+import { For, Show, createMemo } from "solid-js";
+import { Collapsible } from "@kobalte/core/collapsible";
 import { Tooltip } from "../components/Tooltip";
 import { FilterBar } from "../components/FilterBar";
 import { api } from "../../convex/_generated/api";
 import { createQuery } from "../lib/convex";
-import { action, redirect, useAction, useSearchParams } from "@solidjs/router";
-import { getCookie } from "@solidjs/start/http";
+import { useSearchParams } from "@solidjs/router";
+import { redirect } from "@solidjs/web";
+import { getCookie } from "../lib/cookies";
 import {
   resolvePrediction as resolvePredictionOnPds,
   deletePrediction as deletePredictionOnPds,
@@ -17,7 +14,7 @@ import {
 import { getSessionDid } from "../lib/session";
 import Button from "../components/Button";
 
-const resolveAction = action(async (formData: FormData) => {
+async function resolvePrediction(formData: FormData) {
   "use server";
   const did = getCookie("did");
   if (!did) throw new Error("Not logged in");
@@ -28,9 +25,9 @@ const resolveAction = action(async (formData: FormData) => {
   await resolvePredictionOnPds(did, atUri, resolvedAs);
   const search = (formData.get("search") as string) || "";
   return redirect("/" + search);
-}, "resolvePrediction");
+}
 
-const deleteAction = action(async (formData: FormData) => {
+async function deletePrediction(formData: FormData) {
   "use server";
   const did = getCookie("did");
   if (!did) throw new Error("Not logged in");
@@ -39,7 +36,7 @@ const deleteAction = action(async (formData: FormData) => {
   await deletePredictionOnPds(did, atUri);
   const search = (formData.get("search") as string) || "";
   return redirect("/" + search);
-}, "deletePrediction");
+}
 
 export default function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -63,9 +60,7 @@ export default function Home() {
   const predictions = createQuery(api.predictions.getPredictions, () => ({
     filter: resolvedFilter(),
   }));
-  const resolvePrediction = useAction(resolveAction);
-  const deletePredictionAction = useAction(deleteAction);
-  const [sessionDid] = createResource(() => getSessionDid());
+  const sessionDid = createMemo(() => getSessionDid());
 
   const isAuthor = (authorDid: string) => sessionDid() === authorDid;
 
@@ -133,8 +128,8 @@ export default function Home() {
             <For each={filteredPredictions()}>
               {(pred) => (
                 <li class="border rounded bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700">
-                  <CollapsibleRoot>
-                    <CollapsibleTrigger class="flex items-start justify-between p-3 w-full text-left bg-transparent border-none cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset">
+                  <Collapsible>
+                    <Collapsible.Trigger class="flex items-start justify-between p-3 w-full text-left bg-transparent border-none cursor-pointer rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-inset">
                       <div class="min-w-0 flex-1">
                         <p class="text-lg text-zinc-900 dark:text-zinc-100 pr-3">{pred.text}</p>
                         <div class="text-sm text-zinc-500 dark:text-zinc-400 flex items-center justify-between w-full">
@@ -190,8 +185,8 @@ export default function Home() {
                           ✗
                         </span>
                       )}
-                    </CollapsibleTrigger>
-                    <CollapsiblePanel class="border-t border-zinc-200 dark:border-zinc-700 p-3 text-sm text-zinc-500 dark:text-zinc-400">
+                    </Collapsible.Trigger>
+                    <Collapsible.Content class="border-t border-zinc-200 dark:border-zinc-700 p-3 text-sm text-zinc-500 dark:text-zinc-400">
                       <div class="flex justify-between gap-x-6 w-full">
                         <Show when={pred.madeAt} fallback={<span>{fmtDate(pred.createdAt)}</span>}>
                           <Show
@@ -261,7 +256,7 @@ export default function Home() {
                                 const fd = new FormData();
                                 fd.set("atUri", pred.atUri);
                                 fd.set("search", window.location.search);
-                                deletePredictionAction(fd);
+                                deletePrediction(fd);
                               }
                             }}
                           >
@@ -269,8 +264,8 @@ export default function Home() {
                           </Button>
                         </div>
                       </Show>
-                    </CollapsiblePanel>
-                  </CollapsibleRoot>
+                    </Collapsible.Content>
+                  </Collapsible>
                 </li>
               )}
             </For>

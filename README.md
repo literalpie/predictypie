@@ -4,11 +4,11 @@ A social app for making and browsing predictions. It uses AT Proto, so you can s
 
 ## User Guide
 
-* Click on a prediction to see more details about it
-* Click "New Prediction" (after signing in) to create a prediction.
-  * You can add a deadline for the prediction, or make it more open-ended
-  * If you are tracking a prediction made by someone else, fill out the "who made it" field. This can be something like a BlueSky handle, YouTube channel, or just a name.
-  * If you are tracking a prediction made by someone else, I suggest also supplying a "source". This should be a URL where the person made the prediction.
+- Click on a prediction to see more details about it
+- Click "New Prediction" (after signing in) to create a prediction.
+  - You can add a deadline for the prediction, or make it more open-ended
+  - If you are tracking a prediction made by someone else, fill out the "who made it" field. This can be something like a BlueSky handle, YouTube channel, or just a name.
+  - If you are tracking a prediction made by someone else, I suggest also supplying a "source". This should be a URL where the person made the prediction.
 
 ## Developer Quick Start
 
