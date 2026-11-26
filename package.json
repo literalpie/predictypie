@@ -14,31 +14,31 @@
   },
   "dependencies": {
     "@atproto/common-web": "^0.5.0",
-    "@atproto/identity": "^0.5.0",
+    "@atproto/identity": "0.5.12",
     "@atproto/lex": "^0.1.3",
-    "@atproto/oauth-client-node": "^0.4.1",
+    "@atproto/oauth-client-node": "0.4.1",
     "@atproto/syntax": "^0.6.1",
     "@atproto/tap": "^0.3.0",
-    "@msviderok/base-ui-solid": "^1.0.0-beta.11",
+    "@msviderok/base-ui-solid": "^1.0.0-beta.12",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.16.1",
     "@solidjs/start": "2.0.0-alpha.3",
     "@solidjs/vite-plugin-nitro-2": "^0.1.0",
-    "@tailwindcss/vite": "^4.3.1",
-    "@tanstack/solid-form": "^1.33.0",
-    "@types/node": "24.11.0",
-    "convex": "^1.41.0",
-    "oxfmt": "^0.54.0",
-    "oxlint": "^1.69.0",
+    "@tailwindcss/vite": "^4.3.5",
+    "@tanstack/solid-form": "^1.33.5",
+    "@types/node": "26.6.10",
+    "convex": "^1.51.0",
+    "oxfmt": "^0.80.0",
+    "oxlint": "^1.95.0",
     "solid-js": "^1.9.13",
-    "tailwind-merge": "^3.6.0",
-    "tailwindcss": "^4.3.1",
-    "vite": "^7.3.5",
-    "vite-plugin-solid": "^2.11.0"
+    "tailwind-merge": "^3.7.1",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8",
+    "vite-plugin-solid": "^2.11.17"
   },
   "devDependencies": {
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   },
   "engines": {
     "node": ">=24"
@@ -46,7 +46,7 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": "11.6.0",
+      "version": "12.23.0",
       "onFail": "download"
     }
   }
