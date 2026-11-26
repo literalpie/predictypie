@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@atproto/common-web": "^0.5.0",
-    "@atproto/identity": "^0.5.0",
+    "@atproto/identity": "0.5.12",
     "@atproto/lex": "^0.1.3",
-    "@atproto/oauth-client-node": "^0.4.1",
+    "@atproto/oauth-client-node": "0.4.1",
     "@atproto/syntax": "^0.6.1",
     "@atproto/tap": "^0.3.0",
     "@msviderok/base-ui-solid": "^1.0.0-beta.12",
